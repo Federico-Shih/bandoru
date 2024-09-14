@@ -1,0 +1,3 @@
+setuptools
+boto3
+psycopg2-binary
