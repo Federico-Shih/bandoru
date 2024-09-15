@@ -17,11 +17,17 @@ try:
     connection = psycopg2.connect(
         host=rds_proxy_host,
         user=user_name,
-        passwd=password,
-        db=db_name,
-        connect_timeout=5,
+        password=password,
+        dbname=db_name,
     )
 except Exception as e:
-    logger.error("ERROR: Unexpected error: Could not connect to MySQL instance.")
+    logger.error("ERROR: Unexpected error: Could not connect to RDS instance.")
     logger.error(e)
     sys.exit(1)
+
+# rds settings
+def migrate():
+    with connection.cursor() as cur:
+        cur.execute(open("schema.sql", "r").read())
+
+migrate()

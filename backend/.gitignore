@@ -1,0 +1,6 @@
+.idea/
+.bundle/
+bundle.zip
+.pip_cache/
+.venv/
+__pycache__/
