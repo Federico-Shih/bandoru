@@ -1,6 +1,7 @@
 #!/bin/bash
 
 FUNCTION_NAME="BandoruAPI"
+PYTHON_VERSION="3.12"
 
 rm -f bundle.zip
 
@@ -14,7 +15,7 @@ pip install \
     --target .bundle \
     --platform manylinux2014_x86_64 \
     --implementation cp \
-    --python-version 3.12 \
+    --python-version $PYTHON_VERSION \
     --only-binary=:all: \
     --cache-dir .pip_cache \
 
@@ -36,5 +37,6 @@ aws lambda update-function-code \
 
 echo -e "\nCleaning up..."
 rm -f bundle.zip
+rm -Rf .bundle
 
 echo -e "\nDone"
