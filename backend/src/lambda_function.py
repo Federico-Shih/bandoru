@@ -1,66 +1,49 @@
-from json import JSONDecodeError
+from typing import Annotated
 
-from psycopg2 import connect
-from pydantic import ValidationError
+from aws_lambda_powertools import Tracer, Logger
+from aws_lambda_powertools.event_handler import APIGatewayHttpResolver, APIGatewayRestResolver
+from aws_lambda_powertools.event_handler.exceptions import NotFoundError
+from aws_lambda_powertools.logging import correlation_paths
+from aws_lambda_powertools.utilities.typing import LambdaContext
 
-from database import connection
-from uuid import uuid4
-import json
+import bandoru_service
+from forms import CreateBandoruForm
+from dto import BandoruDTO
 
-from forms import BandoruForm
+tracer = Tracer()
+logger = Logger()
+app = APIGatewayHttpResolver(enable_validation=True, debug=True)
 
 
-def lambda_handler(event, context):
-    body = event['body']
-    if body is None:
-        return {
-            "statusCode": 400,
-            "body": json.dumps("Empty body")
-        }
+@app.post("/bandoru")
+@tracer.capture_method
+def post_bandoru(form: CreateBandoruForm):
+    return bandoru_service.create(form), 201
 
-    try:
-        data = json.loads(body)
-    except JSONDecodeError:
-        return {
-            "statusCode": 400,
-            "body": json.dumps("Invalid JSON")
-        }
 
-    try:
-        bandoru_id = post_bandoru(BandoruForm(**data))
+@app.get("/bandoru")
+@tracer.capture_method
+def get_all_bandorus():
+    bandorus = bandoru_service.get_all()
 
-        return {
-            "statusCode": 201,
-            "body": json.dumps({
-                "id": bandoru_id
-            })
-        }
-    except ValidationError as e:
-        return {
-            "statusCode": 400,
-            "body": json.dumps(e.errors())
-        }
+    if len(bandorus) == 0:
+        return None, 204
 
-def post_bandoru(bandoru: BandoruForm) -> str:
-    description = bandoru.description
-    files = bandoru.files
-    parent_id = None if bandoru.parent_id is None else str(bandoru.parent_id)
+    return [BandoruDTO.from_model(ban) for ban in bandorus]
 
-    bandoru_id = str(uuid4())
-    revision_id = str(uuid4())
-    file_ids = [str(uuid4()) for _ in range(len(files))]
 
-    with connection.cursor() as cur:
-        cur.execute("INSERT INTO bandoru(id, description, parent_id) VALUES (%s, %s, %s)", (bandoru_id, description, parent_id))
-        cur.execute("INSERT INTO bandoru_revision(id, bandoru_id) VALUES (%s, %s)", (revision_id, bandoru_id))
+@app.get("/bandoru/<bandoru_id>")
+@tracer.capture_method
+def get_bandoru(bandoru_id: str):
+    bandoru = bandoru_service.get(bandoru_id)
 
-        for i, file in enumerate(files):
-            file_id = file_ids[i]
-            filename = file.filename
-            cur.execute("INSERT INTO file(id, revision_id, filename) VALUES (%s, %s, %s)", (file_id, revision_id, filename))
+    if bandoru is None:
+        raise NotFoundError
 
-        connection.commit()
+    return BandoruDTO.from_model(bandoru)
 
-    # TODO: save to s3
 
-    return bandoru_id
+@logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_HTTP)
+@tracer.capture_lambda_handler
+def lambda_handler(event: dict, context: LambdaContext) -> dict:
+    return app.resolve(event, context)

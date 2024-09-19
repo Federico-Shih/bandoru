@@ -1,2 +1,5 @@
 setuptools
 boto3
+aws-lambda-powertools[tracer,validation]~=2.43.1
+psycopg2-binary
+pydantic~=2.9.2

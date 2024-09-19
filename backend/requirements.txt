@@ -1,2 +1,2 @@
 psycopg2-binary
-pydantic
+pydantic~=2.9.2
