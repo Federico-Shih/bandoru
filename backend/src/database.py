@@ -55,6 +55,7 @@ def migrate():
 
 try:
     connect()
+    migrate()
 except Exception as e:
     try:
         create_db()

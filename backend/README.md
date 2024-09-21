@@ -3,8 +3,8 @@ Partimos desde Lab recién reiniciado
 ## S3
 1. Create Bucket
     1. General Purpose
-    1. Bucket name = 'bandoru-bucket'
-    1. Object Ownership = ACLs disabled
+    1. Bucket name = 'bandoru-bucket-legajoTuyo'
+    1. Object Ownership = ACLs enabled -> bucket owner preferred
     1. Block all public access = desactivado
     1. Bucket versioning = True
     1. Encryption -> dejar default
@@ -19,22 +19,19 @@ Partimos desde Lab recién reiniciado
 1. Your VPCs > Bandoru > Actions > Edit VPC settings
     1. Enabled DNS Hostnames = True
     1. Save
-1. Endpoints > Create Endpoint
-    1. Name Tag =  's3-endpoint'
-    2. Service category = AWS service
-    3. Services = com.amazonaws.us-east-1.s3 -> Gateway
-    4. VPC = bandoru
-    5. Route tables = Nada
-    6. Policy = Full access
 1. Route Tables > Create Route Table
     1. name = 'lambda-route-table'
     1. vpc = bandoru
 1. Route Tables > Create Route Table
     1. name = 'rds-route-table'
     1. vpc = bandoru
-1. Endpoint > s3-endpoint > Route Tables > Manage Route Tables
-    1. Seleccionar lambda-route-table
-    1. Modify route tables
+1. Endpoints > Create Endpoint
+   1. Name Tag =  's3-endpoint'
+   2. Service category = AWS service
+   3. Services = com.amazonaws.us-east-1.s3 -> Gateway
+   4. VPC = bandoru
+   5. Route tables = 'lambda-route-table'
+   6. Policy = Full access
 1. Subnets > Create Subnet
     1. VPC = bandoru
     1. name = 'lambda-1a'
@@ -56,15 +53,6 @@ Partimos desde Lab recién reiniciado
 1. Route Tables > rds-route-table > Subnet Assoc > Edit Subnet Assoc
     1. Selecciono rds-1a
     1. Save
-1. Security Groups > Create sec group
-    1. Name = bandoru-lambda-sg
-    1. Description
-    1. VPC = bandoru
-    1. Outbound rules
-        1. Type = PostgreSQL | Destination = bandoru-db-sg
-        1. Type = All traffic | Destination = com.amazonaws.us-east-1.s3
-
-
 
 ## RDS
 1. Databases > Create Database
@@ -79,9 +67,9 @@ Partimos desde Lab recién reiniciado
     1. DB subnet group = create new
     1. Public access = NO
     1. VPC sg = Create New
-    1. VPC sec group name = bandoru-db-sg
+    1. VPC sec group name = default
     1. AZ = us-east-1a
-    1. Create RDS Proxy = True
+    1. Create RDS Proxy = False -> Consume demasiado
     1. Monitoring -> Turn on Perf insights = False
     1. Todo lo demás, dejar el default
 ## Lambda
@@ -95,14 +83,20 @@ Partimos desde Lab recién reiniciado
     1. Advanced settings > Enable VPC = True
     1. VPC = Bandoru
     1. subnets = lambda-1a y lambda-1b
-    1. Security Group = bandoru-lambda-sg
+    1. Security Group = default
+   2. Poner variables de entorno
+## Attach Lambda to RDS
+1. Databases > bandoru-db > Connectivity & security > Actions > Set up Lambda Connection
+   2. Lambda function = bandoru-lambda
+   3. Connect using RDS Proxy = False 
+   4. Setup
 ## API Gateway
 1. Create API > HTTP API > Build
     1. Add Integrations > Lambda
         1. Lambda function = bandoru-lambda
     1. api name = bandoru-api
     1. Next
-    1. Routes: Method = ANY | Resource path = / | integration targe = bandoru-lambda
+    1. Routes: Method = ANY | Resource path = /{proxy | integration targe = bandoru-lambda
     1. Next
     1. Next
     1. Create
