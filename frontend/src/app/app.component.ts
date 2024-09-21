@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import {NavbarComponent} from "./shared/ui/navbar/navbar.component";
+import {MonacoEditorModule} from "ngx-monaco-editor-v2";
 
 @Component({
   selector: 'app-root',

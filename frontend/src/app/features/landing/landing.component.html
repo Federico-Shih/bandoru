@@ -1,0 +1,33 @@
+<form class="w-full h-full" [formGroup]="bundleForm" (submit)="uploadBundle(bundleForm)">
+  <div class="p-3 w-full h-full overflow-y-scroll grid grid-cols-12 gap-x-4 auto-rows-max gap-y-4">
+    <aside class="col-span-12 md:col-span-3">
+      <div class="md:hidden collapse collapse-arrow border-gray-700 border">
+        <input type="checkbox" />
+        <div class="collapse-title shadow-lg">Bundle details</div>
+        <div class="collapse-content">
+          <app-bundle-metadata-editor
+            [nameFormControl]="bundleForm.controls.name"
+            [descriptionFormControl]="bundleForm.controls.description"
+          />
+        </div>
+      </div>
+      <div class="max-sm:hidden">
+        <app-bundle-metadata-editor
+          [nameFormControl]="bundleForm.controls.name"
+          [descriptionFormControl]="bundleForm.controls.description"
+        />
+      </div>
+    </aside>
+    <section class="col-span-12 md:col-span-9 lg:col-span-8 xl:col-span-6 flex flex-col gap-3 items-stretch">
+      @for (fileEditor of bundleForm.controls.files.controls; track fileEditor.value.id) {
+        <app-bundle-editor [customControl]="fileEditor" (remove)="removeFile($event)" ></app-bundle-editor>
+      }
+      <section class="flex flex-row">
+        <button class="btn btn-primary" (click)="addFile()">Add File</button>
+        <div class="flex-1"></div>
+        <button class="btn btn-success" type="submit">Share</button>
+      </section>
+    </section>
+  </div>
+
+</form>
