@@ -1,6 +1,6 @@
 #!/bin/bash
 
-FUNCTION_NAME="BandoruAPI"
+FUNCTION_NAME="bandoru-lambda"
 PYTHON_VERSION="3.12"
 
 rm -f bundle.zip
@@ -10,7 +10,7 @@ mkdir -p .pip_cache
 
 
 echo -e "\nInstalling requirements..."
-pip install \
+python3.12 -m pip install \
     -r requirements.txt \
     --target .bundle \
     --platform manylinux2014_x86_64 \

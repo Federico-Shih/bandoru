@@ -4,3 +4,4 @@ bundle.zip
 .pip_cache/
 .venv/
 __pycache__/
+Pipfile
