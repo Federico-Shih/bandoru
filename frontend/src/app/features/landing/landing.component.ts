@@ -42,9 +42,9 @@ export class LandingComponent {
       description: bundle.description ?? '',
       files: (bundle.files ?? []).map(file => ({ filename: file.fileName || '' })),
     }).pipe(switchMap((bundleResponse) => {
-      const uploads = bundleResponse.post_urls.map(({ url, file_id }, index) => {
-        const blob = new Blob([bundle?.files?.[index]?.bundleText ?? ''], { type: 'text/plain' });
-        const file = new File([blob], file_id, { type: 'text/plain' });
+      const uploads = bundleResponse.post_urls.map((url, index) => {
+        const blob = new Blob([bundle?.files?.[index]?.bundleText ?? '']);
+        const file = new File([blob], "placeholder_filename");
         return this.bundleRepository.uploadFile(url, file);
       });
       return zip(uploads);

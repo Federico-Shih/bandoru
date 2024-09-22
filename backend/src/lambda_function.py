@@ -1,7 +1,7 @@
 from typing import Annotated
 
 from aws_lambda_powertools import Tracer, Logger
-from aws_lambda_powertools.event_handler import APIGatewayHttpResolver, APIGatewayRestResolver
+from aws_lambda_powertools.event_handler import APIGatewayHttpResolver, APIGatewayRestResolver, CORSConfig
 from aws_lambda_powertools.event_handler.exceptions import NotFoundError
 from aws_lambda_powertools.logging import correlation_paths
 from aws_lambda_powertools.utilities.typing import LambdaContext
@@ -12,7 +12,9 @@ from dto import BandoruDTO
 
 tracer = Tracer()
 logger = Logger()
-app = APIGatewayHttpResolver(enable_validation=True, debug=True)
+
+cors_config = CORSConfig(allow_origin="*", allow_headers=["*"], expose_headers=["*"])
+app = APIGatewayHttpResolver(enable_validation=True, cors=cors_config, debug=True)
 
 
 @app.post("/bandoru")

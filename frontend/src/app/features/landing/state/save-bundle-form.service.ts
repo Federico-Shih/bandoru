@@ -13,8 +13,7 @@ export class SaveBundleFormService {
     files: new FormArray<FileFormType>([
       this.newBundle(),
     ]),
-    name: new FormControl<string>(''),
-    description: new FormControl<string>(''),
+    description: new FormControl<string|null>(''),
   });
 
   constructor() { }

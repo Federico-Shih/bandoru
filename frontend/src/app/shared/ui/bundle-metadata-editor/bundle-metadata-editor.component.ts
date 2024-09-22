@@ -11,8 +11,5 @@ import {FormControl, ReactiveFormsModule} from "@angular/forms";
 })
 export class BundleMetadataEditorComponent {
   @Input()
-  nameFormControl!: FormControl<string | null>;
-
-  @Input()
   descriptionFormControl!: FormControl<string | null>;
 }
