@@ -1,7 +1,7 @@
 # Setup Consola AWS
 Partimos desde Lab recién reiniciado
 ## S3
-1. Create Bucket
+1. Buckets > Create Bucket
     1. General Purpose
     1. Bucket name = 'bandoru-bucket-legajoTuyo'
     1. Object Ownership = ACLs enabled -> bucket owner preferred
@@ -9,6 +9,58 @@ Partimos desde Lab recién reiniciado
     1. Bucket versioning = True
     1. Encryption -> dejar default
     1. Object Lock = disabled
+1. Buckets > bandoru-bucket > Permissions
+    1. CORS > Edit
+    ```json
+    [
+        {
+            "AllowedHeaders": [
+                "*"
+            ],
+            "AllowedMethods": [
+                "GET",
+                "POST",
+                "PUT",
+                "DELETE",
+                "HEAD"
+            ],
+            "AllowedOrigins": [
+                "*"
+            ],
+            "ExposeHeaders": []
+        }
+    ]
+    ```
+1. Buckets > Create Bucket
+    1. General Purpose
+    1. Bucket name = 'bandoru-spa'
+    1. object ownership = ACLs disabled
+    1. Block all public access = False -> i acknowledge
+    1. Bucket versioning = Disabled
+1. Buckets > bandoru-spa > Permissions
+    1. Bucket policy > edit (el arn poner el correspondiente)
+    ```json
+    {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Sid": "PublicReadGetObject",
+                "Effect": "Allow",
+                "Principal": "*",
+                "Action": "s3:GetObject",
+                "Resource": "arn:aws:s3:::bandoru-spa/*"
+            }
+        ]
+    }
+    ```
+1. Buckets > bandoru-spa > Properties
+    1. Static website hosting > edit
+       1. Static website hosting = Enable
+       1. Hosting type = Host a static website
+       1. index document = index.html
+       1. error document = index.html
+       1. save
+1. Correr el script de deploy de frontend/
 ## VPC
 1. Borramos VPC default (opcional)
 1. Your VPCs > Create VPC
@@ -53,6 +105,10 @@ Partimos desde Lab recién reiniciado
 1. Route Tables > rds-route-table > Subnet Assoc > Edit Subnet Assoc
     1. Selecciono rds-1a
     1. Save
+1. Security Groups > Create Security Group
+    1. name = 'bandoru-lambda-sg'
+    1. description
+    1. vpc = bandoru
 
 ## RDS
 1. Databases > Create Database
@@ -67,7 +123,7 @@ Partimos desde Lab recién reiniciado
     1. DB subnet group = create new
     1. Public access = NO
     1. VPC sg = Create New
-    1. VPC sec group name = default
+    1. VPC sec group name = bandoru-db-sg
     1. AZ = us-east-1a
     1. Create RDS Proxy = False -> Consume demasiado
     1. Monitoring -> Turn on Perf insights = False
@@ -83,9 +139,18 @@ Partimos desde Lab recién reiniciado
     1. Advanced settings > Enable VPC = True
     1. VPC = Bandoru
     1. subnets = lambda-1a y lambda-1b
-    1. Security Group = default
-   2. Poner variables de entorno
-## Attach Lambda to RDS
+    1. Security Group = bandoru-lambda-sg
+2. Functions > Bandoru-lambda > Configuration > Env variables > Edit
+    1. "S3_BUCKET": "bandoru-bucket" (nombre del bucket)
+    1. "DB_USER": "postgres"
+    1. "DB_PASS": "lechugapasion"
+    1. "DB_HOST": "bandoru-db.c3t6tuoyl9en.us-east-1.rds.amazonaws.com"
+    1. "DB_NAME": "bandoru"
+3. Functions > Code > Layers(abajo de todo) > Add a layer
+    1. Layer source = AWS layers
+    1. AWS layers = AWSLambdaPowertoolsPythonV2
+    1. Version = 78
+## RDS
 1. Databases > bandoru-db > Connectivity & security > Actions > Set up Lambda Connection
    2. Lambda function = bandoru-lambda
    3. Connect using RDS Proxy = False 
@@ -96,10 +161,15 @@ Partimos desde Lab recién reiniciado
         1. Lambda function = bandoru-lambda
     1. api name = bandoru-api
     1. Next
-    1. Routes: Method = ANY | Resource path = /{proxy | integration targe = bandoru-lambda
+    1. Routes: Method = ANY | Resource path = /{proxy+} | integration targe = bandoru-lambda
     1. Next
     1. Next
     1. Create
+1. APIs > bandoru-api > CORS > Configure
+    1. Access-Control-Allow-Origin = *
+    1. Access-Control-Allow-Headers = *
+    1. Access-Control-Allow-Methods = *
+    4. Access-Control-Expose-Headers = *
 
 
 # Setup Local
