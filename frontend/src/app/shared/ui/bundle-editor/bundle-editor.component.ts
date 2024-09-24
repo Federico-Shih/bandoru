@@ -86,7 +86,7 @@ export class BundleEditorComponent implements OnInit {
     lineDecorationsWidth: '0.5px',
   });
 
-  readOnly = input<boolean>(true);
+  readOnly = input<boolean>(false);
 
   @Input({ required: false })
   customControl!: FileFormType;
