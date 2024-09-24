@@ -3,7 +3,7 @@ Partimos desde Lab recién reiniciado
 ## S3
 1. Buckets > Create Bucket
     1. General Purpose
-    1. Bucket name = 'bandoru-bucket-legajoTuyo'
+    1. Bucket name = 'bandoru-bucket'
     1. Object Ownership = ACLs enabled -> bucket owner preferred
     1. Block all public access = desactivado
     1. Bucket versioning = True
@@ -31,6 +31,17 @@ Partimos desde Lab recién reiniciado
         }
     ]
     ```
+1. Buckets > bandoru-bucket > Management > Lifecycle Rules > Create lifecycle rule
+    1. name = 'bandoru-lifecycle-rule'
+    1. rule scope = Apply to all objects -> I acknowledge...
+    1. lifecycle rule actions = Transition current versions... & Transition noncurrent versions...
+    1. Transition current versions...
+        1. Storage class transitions = Standard-IA
+        1. Days after object creation = 30
+    1. Transition current versions...
+        1. Storage class transitions = Standard-IA
+        1. Days after object become noncurrent = 30
+    1. Create Rule
 1. Buckets > Create Bucket
     1. General Purpose
     1. Bucket name = 'bandoru-spa'
