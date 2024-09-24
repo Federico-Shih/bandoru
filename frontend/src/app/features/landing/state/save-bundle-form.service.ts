@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import {FormArray, FormControl, FormGroup} from "@angular/forms";
 import {BundleGetResponse} from "../../../shared/models/Bundle";
+import {BundleRepository} from "../../../shared/data-access/bundle-repository/bundle-repository.service";
 
 export type BundleFormType = ReturnType<SaveBundleFormService['linkForm']>;
 export type FileFormType = ReturnType<SaveBundleFormService['newBundle']>;
@@ -17,7 +18,7 @@ export class SaveBundleFormService {
     description: new FormControl<string|null>(''),
   });
 
-  constructor() { }
+  constructor(private readonly bundleRepository: BundleRepository) { }
 
   public linkForm() {
     return this.bundleForm;
@@ -48,10 +49,13 @@ export class SaveBundleFormService {
     this.bundleForm.controls.files.clear();
     this.bundleForm.controls.description.setValue(description ?? '');
     files.forEach((file) => {
-      this.bundleForm.controls.files.push(this.withBundle({
-        fileName: file.filename,
-        bundleText: ''
-      }));
+      this.bundleRepository.downloadS3File(file.url).subscribe((response) => {
+        this.bundleForm.controls.files.push(
+          this.withBundle({
+            fileName: file.filename,
+            bundleText: response,
+          }));
+      });
     });
   }
 

@@ -39,4 +39,7 @@ export class BundleRepository {
 
     return this.httpClient.post(url.url, formData);
   }
+  downloadS3File(url: string) {
+    return this.httpClient.get(url, {responseType: 'text'});
+  }
 }

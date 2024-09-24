@@ -5,6 +5,7 @@ import {BundleMetadataEditorComponent} from "../../shared/ui/bundle-metadata-edi
 import {BundleRepository} from "../../shared/data-access/bundle-repository/bundle-repository.service";
 import {Observable, switchMap, zip, zipAll} from "rxjs";
 import {ReactiveFormsModule} from "@angular/forms";
+import {Router} from "@angular/router";
 
 enum State {
   OK,
@@ -29,7 +30,7 @@ export class LandingComponent {
 
   public UIState = State;
 
-  constructor(private readonly saveBundleFormService: SaveBundleFormService, private readonly bundleRepository: BundleRepository) {
+  constructor(private readonly saveBundleFormService: SaveBundleFormService, private readonly bundleRepository: BundleRepository,private readonly router:Router) {
     this.bundleForm = saveBundleFormService.linkForm();
   }
 
@@ -47,10 +48,12 @@ export class LandingComponent {
     }
     this.state = State.SENDING;
     const bundle = bundleForm.getRawValue();
+    let bandoru_id = '';
     this.bundleRepository.postBundle({
       description: bundle.description ?? '',
       files: (bundle.files ?? []).map(file => ({ filename: file.fileName || '' })),
     }).pipe(switchMap((bundleResponse) => {
+      bandoru_id = bundleResponse.bandoru_id;
       const uploads = bundleResponse.post_urls.map((url, index) => {
         const blob = new Blob([bundle?.files?.[index]?.bundleText ?? '']);
         const file = new File([blob], "placeholder_filename");
@@ -62,7 +65,7 @@ export class LandingComponent {
       next: () => {
         this.state = State.OK;
         console.log('Bundle uploaded');
-        alert('Bundle uploaded');
+        this.router.navigate([`/share/${bandoru_id}`]);
       },
       error: (err) => {
         this.state = State.OK;
