@@ -1,19 +1,19 @@
 CREATE TABLE IF NOT EXISTS bandoru(
     id UUID PRIMARY KEY,
-    parent_id UUID REFERENCES bandoru,
+    parent_id UUID REFERENCES bandoru(id),
     description VARCHAR(255),
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS bandoru_revision(
     id UUID PRIMARY KEY,
-    bandoru_id UUID NOT NULL REFERENCES bandoru ON DELETE CASCADE,
+    bandoru_id UUID NOT NULL REFERENCES bandoru(id) ON DELETE CASCADE,
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS file(
     id UUID PRIMARY KEY,
-    revision_id UUID NOT NULL REFERENCES bandoru_revision ON DELETE CASCADE,
+    revision_id UUID NOT NULL REFERENCES bandoru_revision(id) ON DELETE CASCADE,
     filename VARCHAR(127) NOT NULL
 );
 
