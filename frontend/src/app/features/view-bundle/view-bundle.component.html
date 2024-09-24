@@ -1,0 +1,26 @@
+<div class="p-3 w-full h-full overflow-y-scroll grid grid-cols-12 gap-x-4 auto-rows-max gap-y-4">
+    <aside class="col-span-12 md:col-span-3">
+      <div class="md:hidden collapse collapse-arrow border-gray-700 border">
+        <input type="checkbox" />
+        <div class="collapse-title shadow-lg">Bundle details</div>
+        <div class="collapse-content">
+            Description: {{ this.form.controls.description.value }}
+        </div>
+      </div>
+      <div class="max-sm:hidden flex flex-col card shadow-lg">
+        <div class="card-body">
+            <h2 class="card-title text-lg">Description:</h2>
+            <p>
+                {{ this.form.controls.description.value }}
+            </p>
+        </div>
+      </div>
+    </aside>
+    <section class="col-span-12 md:col-span-9 lg:col-span-8 xl:col-span-6 flex flex-col gap-3 items-stretch">
+      @for (file of form.controls.files.controls; track file.value.id) {
+        <app-bundle-editor [customControl]="file" [readOnly]="true">
+
+        </app-bundle-editor>
+      }
+    </section>
+  </div>

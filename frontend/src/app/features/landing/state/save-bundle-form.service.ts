@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import {FormArray, FormControl, FormGroup} from "@angular/forms";
+import {BundleGetResponse} from "../../../shared/models/Bundle";
 
 export type BundleFormType = ReturnType<SaveBundleFormService['linkForm']>;
 export type FileFormType = ReturnType<SaveBundleFormService['newBundle']>;
@@ -30,9 +31,28 @@ export class SaveBundleFormService {
     });
   }
 
+  private withBundle({ fileName, bundleText }: { fileName: string, bundleText: string }) {
+    return new FormGroup({
+      fileName: new FormControl(fileName),
+      bundleText: new FormControl(bundleText),
+      id: new FormControl(this.index++),
+    });
+  }
+
   public addFile() {
     const bundles = this.bundleForm.controls.files;
     bundles.push(this.newBundle());
+  }
+
+  public loadBundle({ files, description }: BundleGetResponse) {
+    this.bundleForm.controls.files.clear();
+    this.bundleForm.controls.description.setValue(description ?? '');
+    files.forEach((file) => {
+      this.bundleForm.controls.files.push(this.withBundle({
+        fileName: file.filename,
+        bundleText: ''
+      }));
+    });
   }
 
   public removeFile(id: number) {
