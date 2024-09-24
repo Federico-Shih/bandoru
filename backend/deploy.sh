@@ -10,7 +10,7 @@ mkdir -p .pip_cache
 
 
 echo -e "\nInstalling requirements..."
-python3.12 -m pip install \
+pip install \
     -r requirements.txt \
     --target .bundle \
     --platform manylinux2014_x86_64 \
