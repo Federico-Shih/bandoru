@@ -5,16 +5,18 @@ from pydantic import BaseModel, UUID4
 
 from models import BandoruCurrent, FileCurrent
 from utils import uuid4_to_base64
-
+from bandoru_s3_bucket import get_file_url
 
 class FileDTO(BaseModel):
     id: str
     filename: str
+    url:str
 
     @staticmethod
     def from_model(model: FileCurrent):
         model_data = model.model_dump()
         model_data['id'] = uuid4_to_base64(model.id)
+        model_data['url'] = get_file_url(model_data['id'],model.filename)
         return FileDTO(**model_data)
 
 class BandoruDTO(BaseModel):

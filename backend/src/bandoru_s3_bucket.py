@@ -2,7 +2,6 @@ import os
 
 import boto3
 
-from utils import file_extension
 
 bucket = os.environ["S3_BUCKET"]
 max_file_size = 1 * 2**20 # 1MB
@@ -18,3 +17,6 @@ def create_file_post_url(file_id: str, filename: str) -> dict:
 
     url = s3.generate_presigned_post(Bucket=bucket, Key=f"{file_id}/{filename}", Conditions=conditions, ExpiresIn=url_expiration_seconds)
     return url
+
+def get_file_url(file_id: str, filename: str) -> str:
+    return s3.generate_presigned_url('get_object', Params={'Bucket': bucket, 'Key': f"{file_id}/{filename}"}, ExpiresIn=url_expiration_seconds)
