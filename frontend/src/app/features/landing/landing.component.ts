@@ -6,6 +6,11 @@ import {BundleRepository} from "../../shared/data-access/bundle-repository/bundl
 import {Observable, switchMap, zip, zipAll} from "rxjs";
 import {ReactiveFormsModule} from "@angular/forms";
 
+enum State {
+  OK,
+  SENDING,
+}
+
 @Component({
   selector: 'app-landing',
   standalone: true,
@@ -20,6 +25,9 @@ import {ReactiveFormsModule} from "@angular/forms";
 })
 export class LandingComponent {
   bundleForm: BundleFormType;
+  state: State = State.OK;
+
+  public UIState = State;
 
   constructor(private readonly saveBundleFormService: SaveBundleFormService, private readonly bundleRepository: BundleRepository) {
     this.bundleForm = saveBundleFormService.linkForm();
@@ -37,6 +45,7 @@ export class LandingComponent {
     if (bundleForm.invalid) {
       return;
     }
+    this.state = State.SENDING;
     const bundle = bundleForm.getRawValue();
     this.bundleRepository.postBundle({
       description: bundle.description ?? '',
@@ -51,13 +60,20 @@ export class LandingComponent {
     }))
       .subscribe({
       next: () => {
+        this.state = State.OK;
         console.log('Bundle uploaded');
         alert('Bundle uploaded');
       },
       error: (err) => {
+        this.state = State.OK;
         console.error(err);
+        alert(`Error in uploading Bundle: ${err.statusText}`)
       }
     });
+  }
+
+  getUIState(): State {
+    return this.state;
   }
 
   protected readonly asFormControl = asFormControl;

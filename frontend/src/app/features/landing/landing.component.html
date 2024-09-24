@@ -23,7 +23,7 @@
       <section class="flex flex-row">
         <button class="btn btn-primary" (click)="addFile()">Add File</button>
         <div class="flex-1"></div>
-        <button class="btn btn-success" type="submit">Share</button>
+        <button class="btn btn-success" [class]="state === UIState.SENDING ? 'loading':''" type="submit">Share</button>
       </section>
     </section>
   </div>
