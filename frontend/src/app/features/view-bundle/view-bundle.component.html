@@ -1,4 +1,4 @@
-<div class="p-3 w-full h-full overflow-y-scroll grid grid-cols-12 gap-x-4 auto-rows-max gap-y-4">
+<div class="p-3 w-full grid grid-cols-12 gap-x-4 auto-rows-max gap-y-4">
     <aside class="col-span-12 md:col-span-3">
       <div class="md:hidden collapse collapse-arrow border-gray-700 border">
         <input type="checkbox" />
@@ -7,7 +7,7 @@
             Description: {{ this.form.controls.description.value }}
         </div>
       </div>
-      <div class="max-sm:hidden flex flex-col card shadow-lg">
+      <div class="max-sm:hidden flex flex-col card shadow-sm  border border-gray-700">
         <div class="card-body">
             <h2 class="card-title text-lg">Description:</h2>
             <p>
@@ -17,10 +17,16 @@
       </div>
     </aside>
     <section class="col-span-12 md:col-span-9 lg:col-span-8 xl:col-span-6 flex flex-col gap-3 items-stretch">
-      @for (file of form.controls.files.controls; track file.value.id) {
-        <app-bundle-editor [customControl]="file" [readOnly]="true">
+      @if (loadingBundle()) {
+        <div class="w-full h-full flex justify-center items-center">
+          <span class="loading loading-bars loading-lg"></span>
+        </div>
+      } @else {
+        @for (file of form.controls.files.controls; track file.value.id) {
+          <app-bundle-editor [customControl]="file" [readOnly]="true">
 
-        </app-bundle-editor>
+          </app-bundle-editor>
+        }
       }
     </section>
   </div>

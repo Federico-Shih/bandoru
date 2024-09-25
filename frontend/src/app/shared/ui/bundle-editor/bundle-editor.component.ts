@@ -1,10 +1,11 @@
 import {Component, computed, DestroyRef, EventEmitter, inject, input, Input, NO_ERRORS_SCHEMA, OnDestroy, OnInit, Output, signal} from '@angular/core';
 import {ReactiveFormsModule} from "@angular/forms";
 import {MonacoEditorModule} from "ngx-monaco-editor-v2";
-import {FileFormType} from "../../../features/landing/state/save-bundle-form.service";
+import {FileFormType} from "../../state/save-bundle-form/save-bundle-form.service";
 import {debounceTime} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {NgIf} from "@angular/common";
+import {ToastService} from "../../state/toast/toast.service";
 
 const extensionToLanguageMap: { [key: string]: string } = {
   '.abap': 'abap',
@@ -68,12 +69,19 @@ const extensionToLanguageMap: { [key: string]: string } = {
   styleUrl: './bundle-editor.component.scss',
 })
 export class BundleEditorComponent implements OnInit {
+  toast = inject(ToastService);
   destroyRef = inject(DestroyRef);
 
   ngOnInit() {
+    if (this.customControl?.controls?.fileName?.value) {
+      this.changeLanguageFromFilename(this.customControl.controls.fileName.value);
+    }
+
     this.customControl?.controls?.fileName?.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef), debounceTime(500)).subscribe({
-      next: (filename) => this.changeLanguageFromFilename(filename),
+      next: (filename) => {
+        this.changeLanguageFromFilename(filename);
+      },
     });
   }
 
@@ -84,6 +92,10 @@ export class BundleEditorComponent implements OnInit {
     lineNumbersMinChars:3,
     glyphMargin: false,
     lineDecorationsWidth: '0.5px',
+    height: '250px',
+    automaticLayout: true,
+    wordWrap: 'on',
+    scrollBeyondLastLine: false,
   });
 
   readOnly = input<boolean>(false);
@@ -102,14 +114,35 @@ export class BundleEditorComponent implements OnInit {
     };
   });
 
+  copyToClipboard() {
+    navigator.clipboard.writeText(this.customControl.controls.bundleText.value ?? '').then(r => {
+      this.toast.info(`${this.customControl.controls.fileName.value} copied to clipboard!`);
+    });
+  }
+
+  downloadFile() {
+    const blob = new Blob([this.customControl.controls.bundleText.value ?? ''], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = this.customControl.controls.fileName.value ?? 'file.txt';
+    a.click();
+    document.removeChild(a);
+  }
 
   private changeLanguageFromFilename(filename: string | null){
     if (!filename) return;
     const split = filename.split('.')
     if(split.length > 1){
       const ext = `.${split[split.length - 1]}`;
-      console.log(ext);
       this.baseEditor.update((prev) => ({ ...prev, language: extensionToLanguageMap[ext] || 'plaintext'}));
+    }
+  }
+
+  openNewPage() {
+    const newUrl = this.customControl.controls.url.value;
+    if (newUrl) {
+      window.open(this.customControl.controls.url.value ?? '', '_blank');
     }
   }
 }

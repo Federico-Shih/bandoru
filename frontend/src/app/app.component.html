@@ -3,9 +3,17 @@
 
 </style>
 
-<main class="main">
+<main class="main h-full w-full">
   <app-navbar></app-navbar>
-  <div class="h-full w-full">
+  <div class="h-full w-full overflow-y-scroll">
     <router-outlet />
   </div>
 </main>
+
+@if (shownToast(); as toast) {
+  <div class="toast toast-top toast-end mt-20">
+    <div class="alert {{toast.style}}">
+      {{toast.message}}
+    </div>
+  </div>
+}

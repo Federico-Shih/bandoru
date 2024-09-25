@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
-import {FormArray, FormControl, FormGroup} from "@angular/forms";
-import {BundleGetResponse} from "../../../shared/models/Bundle";
-import { BundleRepository } from '../../../shared/data-access/bundle-repository/bundle-repository.service';
+import {FormArray, FormControl, FormGroup, Validators} from "@angular/forms";
+import {BundleGetResponse} from "../../models/Bundle";
+import { BundleRepository } from '../../data-access/bundle-repository/bundle-repository.service';
 import { map, Observable, zip } from 'rxjs';
 
 export type BundleFormType = ReturnType<SaveBundleFormService['linkForm']>;
@@ -15,8 +15,12 @@ export class SaveBundleFormService {
   private bundleForm = new FormGroup({
     files: new FormArray<FileFormType>([
       this.newBundle(),
-    ]),
+    ], {
+      updateOn: 'submit'
+    }),
     description: new FormControl<string|null>(''),
+  }, {
+    updateOn: 'submit'
   });
 
   constructor(private readonly bundleRepository: BundleRepository) { }
@@ -26,20 +30,18 @@ export class SaveBundleFormService {
   }
 
   private newBundle() {
-    return new FormGroup({
-      fileName: new FormControl<string>(''),
-      bundleText: new FormControl<string>(''),
-      id: new FormControl<number>(this.index++),
-      loading: new FormControl<boolean>(false),
-    });
+    return this.withBundle({ fileName: '', bundleText: '', loading: false, url: '' });
   }
 
-  private withBundle({ fileName, bundleText, loading }: { fileName: string, bundleText: string, loading: boolean }) {
+  private withBundle({ fileName, bundleText, loading, url }: { fileName: string, bundleText: string, loading: boolean, url: string }) {
     return new FormGroup({
-      fileName: new FormControl(fileName),
+      fileName: new FormControl(fileName, { validators: [Validators.required], updateOn: 'submit' }),
       bundleText: new FormControl(bundleText),
       id: new FormControl(this.index++),
-      loading: new FormControl<boolean>(true),
+      loading: new FormControl<boolean>(loading),
+      url: new FormControl<string>(url),
+    }, {
+      updateOn: 'submit'
     });
   }
 
@@ -48,17 +50,17 @@ export class SaveBundleFormService {
     bundles.push(this.newBundle());
   }
 
-  bundleService = inject(BundleRepository);
 
   public loadBundle({ files, description }: BundleGetResponse) {
     this.bundleForm.controls.files.clear();
     this.bundleForm.controls.description.setValue(description ?? '');
-  
+
     files.forEach((file) => {
       this.bundleForm.controls.files.push(this.withBundle({
         fileName: file.filename,
         bundleText: '',
         loading: true,
+        url: file.url,
       }));
     })
   }

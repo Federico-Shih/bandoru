@@ -6,7 +6,7 @@ import { BundleRepository } from '../../shared/data-access/bundle-repository/bun
 import { BundleGetResponse } from '../../shared/models/Bundle';
 import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import { BundleEditorComponent } from '../../shared/ui/bundle-editor/bundle-editor.component';
-import {BundleFormType, SaveBundleFormService} from "../landing/state/save-bundle-form.service";
+import {BundleFormType, SaveBundleFormService} from "../../shared/state/save-bundle-form/save-bundle-form.service";
 
 @Component({
   selector: 'app-view-bundle',
@@ -51,7 +51,6 @@ export class ViewBundleComponent {
           fileControl.bundleText.setValue(textDecoder.decode(fileContent));
         },
         error: (err) => {
-          console.error(err);
           this.loadingBundle.set(false);
           if (err instanceof HttpErrorResponse) {
             if (err.status === 404) {

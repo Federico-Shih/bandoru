@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
+import {Component, inject} from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import {NavbarComponent} from "./shared/ui/navbar/navbar.component";
-import {MonacoEditorModule} from "ngx-monaco-editor-v2";
+import {ToastService} from "./shared/state/toast/toast.service";
 
 @Component({
   selector: 'app-root',
@@ -12,4 +12,7 @@ import {MonacoEditorModule} from "ngx-monaco-editor-v2";
 })
 export class AppComponent {
   title = 'frontend';
+  toast = inject(ToastService);
+
+  shownToast = this.toast.showToast();
 }

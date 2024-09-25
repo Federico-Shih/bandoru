@@ -1,7 +1,7 @@
-<form class="w-full h-full" [formGroup]="bundleForm" (submit)="uploadBundle(bundleForm)">
-  <div class="p-3 w-full h-full overflow-y-scroll grid grid-cols-12 gap-x-4 auto-rows-max gap-y-4">
+<form [formGroup]="bundleForm" novalidate (submit)="uploadBundle(bundleForm)">
+  <div class="p-3 w-full grid grid-cols-12 gap-x-4 auto-rows-max gap-y-4 relative">
     <aside class="col-span-12 md:col-span-3">
-      <div class="md:hidden collapse collapse-arrow border-gray-700 border">
+      <div class="md:hidden collapse collapse-arrow border-gray-700 border flex-shrink-0">
         <input type="checkbox" />
         <div class="collapse-title shadow-lg">Bundle details</div>
         <div class="collapse-content">
@@ -10,7 +10,7 @@
           />
         </div>
       </div>
-      <div class="max-sm:hidden">
+      <div class="max-md:hidden">
         <app-bundle-metadata-editor
           [descriptionFormControl]="bundleForm.controls.description"
         />
@@ -20,12 +20,18 @@
       @for (fileEditor of bundleForm.controls.files.controls; track fileEditor.value.id) {
         <app-bundle-editor [customControl]="fileEditor" (remove)="removeFile($event)" ></app-bundle-editor>
       }
+      @if (bundleForm.invalid && bundleForm.dirty) {
+        <div class="alert alert-warning">You cannot leave empty filenames</div>
+      }
       <section class="flex flex-row">
-        <button class="btn btn-primary" (click)="addFile()">Add File</button>
+        <button class="btn btn-primary" type="button" (click)="addFile()">Add File</button>
         <div class="flex-1"></div>
-        <button class="btn btn-success" [class]="state === UIState.SENDING ? 'loading':''" type="submit">Share</button>
+        <button type="submit" class="btn btn-success" [class]="state === UIState.SENDING ? 'loading':''" >Share</button>
       </section>
     </section>
   </div>
 
 </form>
+<div class="mb-14">
+
+</div>

@@ -7,6 +7,7 @@
         class="input input-bordered w-full h-8 max-w-xs"
         [formControl]="customControl.controls.fileName"
         [readonly]="readOnly()"
+        [tabIndex]="readOnly() ? -1 : 0"
       />
       <button *ngIf="!readOnly()" class="btn btn-square btn-outline hover:bg-error text-error border-gray-600 hover:text-white h-8 w-8 min-h-8" (click)="remove.emit(customControl.value.id ?? 0)">
         <div class="">
@@ -18,20 +19,42 @@
       <div class="flex-1">
 
       </div>
-      <button *ngIf="readOnly()" class="btn btn-square  h-8 w-8 min-h-8">
+      <button *ngIf="readOnly()" class="btn btn-square  h-8 w-8 min-h-8" (click)="copyToClipboard()">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
           <path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184" />
         </svg>
       </button>
-      <button *ngIf="readOnly()" class="btn btn-square  h-8 w-8 min-h-8">
+      <button *ngIf="readOnly()" class="btn btn-square  h-8 w-8 min-h-8" (click)="downloadFile()">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
           <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
         </svg>
       </button>
+<!--      <button *ngIf="readOnly()" class="btn btn-square h-8 w-8 min-h-8" (click)="openNewPage()">-->
+<!--        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">-->
+<!--          <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />-->
+<!--        </svg>-->
+<!--      </button>-->
     </div>
-    <ngx-monaco-editor
-      [formControl]="customControl.controls.bundleText"
-      [options]="editorOptions()"
-    ></ngx-monaco-editor>
+    <div class="h-[250px]">
+      @if (customControl.controls.loading.value) {
+        <div class="flex flex-col h-full gap-3 pt-4 w-full">
+          <div class="skeleton h-4 w-full"></div>
+          <div class="skeleton h-4 w-full"></div>
+          <div class="skeleton h-4 w-full"></div>
+          <div class="skeleton h-4 w-full"></div>
+          <div class="skeleton h-4 w-full"></div>
+          <div class="skeleton h-4 w-full"></div>
+          <div class="skeleton h-4 w-full"></div>
+          <div class="skeleton h-4 w-full"></div>
+          <div class="skeleton h-4 w-full"></div>
+        </div>
+      } @else {
+        <ngx-monaco-editor
+          style="height:100%;"
+          [formControl]="customControl.controls.bundleText"
+          [options]="editorOptions()"
+        ></ngx-monaco-editor>
+      }
+    </div>
   </div>
 </div>
