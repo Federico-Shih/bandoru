@@ -1,4 +1,4 @@
-<form [formGroup]="bundleForm" novalidate (submit)="uploadBundle(bundleForm)">
+<form [formGroup]="bundleForm" novalidate (submit)="uploadBundle(bundleForm)" class="mb-14">
   <div class="p-3 w-full grid grid-cols-12 gap-x-4 auto-rows-max gap-y-4 relative">
     <aside class="col-span-12 md:col-span-3">
       <div class="md:hidden collapse collapse-arrow border-gray-700 border flex-shrink-0">
@@ -21,7 +21,7 @@
         <app-bundle-editor [customControl]="fileEditor" (remove)="removeFile($event)" ></app-bundle-editor>
       }
       @if (bundleForm.invalid && bundleForm.dirty) {
-        <div class="alert alert-warning">You cannot leave empty filenames</div>
+        <div class="alert alert-warning">You cannot leave empty filenames nor empty contents</div>
       }
       <section class="flex flex-row">
         <button class="btn btn-primary" type="button" (click)="addFile()">Add File</button>
@@ -32,6 +32,3 @@
   </div>
 
 </form>
-<div class="mb-14">
-
-</div>

@@ -1,4 +1,12 @@
-<label class="input input-bordered flex items-center gap-2">
+<label class="md:hidden lg:flex input input-bordered flex items-center gap-2">
   Bandoru description
   <input type="text" class="grow" [formControl]="descriptionFormControl" placeholder="My new bandoru..." />
+</label>
+
+<label class="lg:hidden w-full max-w-xs">
+  <div class="label">
+    <span class="label-text">Bandoru description</span>
+  </div>
+  <input type="text" class="input input-bordered w-full max-w-xs grow" [formControl]="descriptionFormControl" placeholder="My new bandoru..." />
+
 </label>

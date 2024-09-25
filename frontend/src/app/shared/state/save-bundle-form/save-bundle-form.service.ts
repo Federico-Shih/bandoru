@@ -32,7 +32,7 @@ export class SaveBundleFormService {
   private withBundle({ fileName, bundleText, loading, url }: { fileName: string, bundleText: string, loading: boolean, url: string }) {
     return new FormGroup({
       fileName: new FormControl(fileName, { validators: [Validators.required] }),
-      bundleText: new FormControl(bundleText),
+      bundleText: new FormControl(bundleText, { validators: [Validators.required, Validators.minLength(1)]}),
       id: new FormControl(this.index++),
       loading: new FormControl<boolean>(loading),
       url: new FormControl<string>(url),
