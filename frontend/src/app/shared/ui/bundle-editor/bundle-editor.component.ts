@@ -1,4 +1,18 @@
-import {Component, computed, DestroyRef, EventEmitter, inject, input, Input, NO_ERRORS_SCHEMA, OnDestroy, OnInit, Output, signal} from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  computed,
+  DestroyRef,
+  EventEmitter,
+  inject,
+  input,
+  Input,
+  NO_ERRORS_SCHEMA,
+  OnDestroy,
+  OnInit,
+  Output,
+  signal
+} from '@angular/core';
 import {ReactiveFormsModule} from "@angular/forms";
 import {MonacoEditorModule} from "ngx-monaco-editor-v2";
 import {FileFormType} from "../../state/save-bundle-form/save-bundle-form.service";

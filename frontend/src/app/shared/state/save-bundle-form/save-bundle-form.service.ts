@@ -15,12 +15,8 @@ export class SaveBundleFormService {
   private bundleForm = new FormGroup({
     files: new FormArray<FileFormType>([
       this.newBundle(),
-    ], {
-      updateOn: 'submit'
-    }),
+    ]),
     description: new FormControl<string|null>(''),
-  }, {
-    updateOn: 'submit'
   });
 
   constructor(private readonly bundleRepository: BundleRepository) { }
@@ -35,13 +31,11 @@ export class SaveBundleFormService {
 
   private withBundle({ fileName, bundleText, loading, url }: { fileName: string, bundleText: string, loading: boolean, url: string }) {
     return new FormGroup({
-      fileName: new FormControl(fileName, { validators: [Validators.required], updateOn: 'submit' }),
+      fileName: new FormControl(fileName, { validators: [Validators.required] }),
       bundleText: new FormControl(bundleText),
       id: new FormControl(this.index++),
       loading: new FormControl<boolean>(loading),
       url: new FormControl<string>(url),
-    }, {
-      updateOn: 'submit'
     });
   }
 

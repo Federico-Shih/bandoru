@@ -1,6 +1,6 @@
 #!/bin/bash
 
-S3_NAME="bandoru-spa"
+S3_NAME="bandoru-spa-62293"
 
 pnpm build
 
