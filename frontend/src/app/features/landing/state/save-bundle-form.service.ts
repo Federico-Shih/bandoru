@@ -1,7 +1,8 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import {FormArray, FormControl, FormGroup} from "@angular/forms";
 import {BundleGetResponse} from "../../../shared/models/Bundle";
-import {BundleRepository} from "../../../shared/data-access/bundle-repository/bundle-repository.service";
+import { BundleRepository } from '../../../shared/data-access/bundle-repository/bundle-repository.service';
+import { map, Observable, zip } from 'rxjs';
 
 export type BundleFormType = ReturnType<SaveBundleFormService['linkForm']>;
 export type FileFormType = ReturnType<SaveBundleFormService['newBundle']>;
@@ -29,14 +30,16 @@ export class SaveBundleFormService {
       fileName: new FormControl<string>(''),
       bundleText: new FormControl<string>(''),
       id: new FormControl<number>(this.index++),
+      loading: new FormControl<boolean>(false),
     });
   }
 
-  private withBundle({ fileName, bundleText }: { fileName: string, bundleText: string }) {
+  private withBundle({ fileName, bundleText, loading }: { fileName: string, bundleText: string, loading: boolean }) {
     return new FormGroup({
       fileName: new FormControl(fileName),
       bundleText: new FormControl(bundleText),
       id: new FormControl(this.index++),
+      loading: new FormControl<boolean>(true),
     });
   }
 
@@ -45,18 +48,19 @@ export class SaveBundleFormService {
     bundles.push(this.newBundle());
   }
 
+  bundleService = inject(BundleRepository);
+
   public loadBundle({ files, description }: BundleGetResponse) {
     this.bundleForm.controls.files.clear();
     this.bundleForm.controls.description.setValue(description ?? '');
+  
     files.forEach((file) => {
-      this.bundleRepository.downloadS3File(file.url).subscribe((response) => {
-        this.bundleForm.controls.files.push(
-          this.withBundle({
-            fileName: file.filename,
-            bundleText: response,
-          }));
-      });
-    });
+      this.bundleForm.controls.files.push(this.withBundle({
+        fileName: file.filename,
+        bundleText: '',
+        loading: true,
+      }));
+    })
   }
 
   public removeFile(id: number) {

@@ -4,6 +4,7 @@ import {BundleFormDto} from "../../models/BundlePostDto";
 import {BundleGetResponse, BundleUploadResponse, PresignedUrlResponse} from "../../models/Bundle";
 
 import {environment} from "../../../../environments/environment";
+import { Observable } from 'rxjs';
 
 const API_URL = environment.apiUrl;
 
@@ -39,7 +40,10 @@ export class BundleRepository {
 
     return this.httpClient.post(url.url, formData);
   }
-  downloadS3File(url: string) {
-    return this.httpClient.get(url, {responseType: 'text'});
+
+  downloadFile(url: string): Observable<ArrayBuffer> {
+    return this.httpClient.get(url, {
+      responseType: "arraybuffer"
+    });
   }
 }

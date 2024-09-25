@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
-import { filter, map, switchMap, tap } from 'rxjs';
+import { filter, map, merge, mergeAll, switchMap, tap } from 'rxjs';
 import { BundleRepository } from '../../shared/data-access/bundle-repository/bundle-repository.service';
 import { BundleGetResponse } from '../../shared/models/Bundle';
 import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
@@ -24,6 +24,7 @@ export class ViewBundleComponent {
     private readonly router: Router,
     private readonly saveBundleFormService: SaveBundleFormService,
   ) {
+    const textDecoder = new TextDecoder();
     this.routeParams.paramMap
       .pipe(takeUntilDestroyed(), map((paramMap) => paramMap.get('id')))
       .pipe(tap((param) => {
@@ -35,10 +36,19 @@ export class ViewBundleComponent {
       .pipe(filter((value): value is string => value !== null))
       .pipe(tap(console.log))
       .pipe(switchMap((id) => this.bundleRepository.getBundle(id)))
+      .pipe(tap((bundle) => {
+        this.loadingBundle.set(false);
+        this.saveBundleFormService.loadBundle(bundle);
+      })).pipe(
+        switchMap(({ files }) => {
+          return merge(...files.map((file, index) => this.bundleRepository.downloadFile(file.url).pipe(map((fileContent) => ({ fileContent, ...file, index })))))
+        })
+      )
       .subscribe({
-        next: (bundle) => {
-          this.loadingBundle.set(false);
-          this.saveBundleFormService.loadBundle(bundle);
+        next: ({ fileContent, index }) => {
+          const fileControl = this.form.controls.files.at(index).controls;
+          fileControl.loading.setValue(false);
+          fileControl.bundleText.setValue(textDecoder.decode(fileContent));
         },
         error: (err) => {
           console.error(err);
