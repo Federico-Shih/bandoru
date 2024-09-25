@@ -7,11 +7,12 @@ import { BundleGetResponse } from '../../shared/models/Bundle';
 import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import { BundleEditorComponent } from '../../shared/ui/bundle-editor/bundle-editor.component';
 import {BundleFormType, SaveBundleFormService} from "../../shared/state/save-bundle-form/save-bundle-form.service";
+import { CopyLinkComponent } from "../../shared/ui/copy-link/copy-link.component";
 
 @Component({
   selector: 'app-view-bundle',
   standalone: true,
-  imports: [BundleEditorComponent],
+  imports: [BundleEditorComponent, CopyLinkComponent],
   templateUrl: './view-bundle.component.html',
   providers: [SaveBundleFormService]
 })
@@ -61,6 +62,8 @@ export class ViewBundleComponent {
       });
     this.form = this.saveBundleFormService.linkForm();
   }
+
+  currentUrl = window.location.href;
 
   loadingBundle = signal(true);
 }
