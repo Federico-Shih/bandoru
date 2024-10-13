@@ -80,6 +80,6 @@ resource "aws_lambda_permission" "api_gw" {
     function_name = each.value.function_name
     principal     = "apigateway.amazonaws.com"
 
-    source_arn = "${aws_apigatewayv2_api.api.execution_arn}${each.value.route}/"
+    source_arn = "${aws_apigatewayv2_api.api.execution_arn}/*/*${each.value.route}/{proxy+}"
 }
 
