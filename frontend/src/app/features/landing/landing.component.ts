@@ -3,7 +3,7 @@ import {asFormControl, BundleFormType, SaveBundleFormService} from "../../shared
 import {BundleEditorComponent} from "../../shared/ui/bundle-editor/bundle-editor.component";
 import {BundleMetadataEditorComponent} from "../../shared/ui/bundle-metadata-editor/bundle-metadata-editor.component";
 import {BundleRepository} from "../../shared/data-access/bundle-repository/bundle-repository.service";
-import {map, Observable, switchMap, zip, zipAll} from "rxjs";
+import {map, Observable, retry, switchMap, zip, zipAll} from "rxjs";
 import {AbstractControl, FormArray, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {Router} from "@angular/router";
 import {ToastService} from "../../shared/state/toast/toast.service";
@@ -62,7 +62,7 @@ export class LandingComponent {
       const uploads = bundleResponse.post_urls.map((url, index) => {
         const blob = new Blob([bundle?.files?.[index]?.bundleText ?? '']);
         const file = new File([blob], "placeholder_filename");
-        return this.bundleRepository.uploadFile(url, file);
+        return this.bundleRepository.uploadFile(url, file).pipe(retry(2));
       });
       return zip(uploads).pipe(map(() => ({ ...bundleResponse})));
     })).subscribe({
