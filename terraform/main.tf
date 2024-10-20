@@ -177,5 +177,5 @@ module "lambdas" {
   vpc_subnets_ids = module.vpc.intra_subnets
   vpc_security_group_ids = [aws_security_group.bandoru_lambda_sg.id]
   allowed_origins = ["http://${aws_s3_bucket_website_configuration.spa-website-config.website_endpoint}"]
-  path_to_placeholder_zip = file("${path.module}/hello.zip")
+  path_to_placeholder_zip = "${abspath(path.root)}/hello.zip"
 }

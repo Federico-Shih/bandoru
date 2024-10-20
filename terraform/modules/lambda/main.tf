@@ -45,7 +45,7 @@ resource "aws_apigatewayv2_api" "api" {
 }
 
 resource "aws_apigatewayv2_integration" "lambda_integration" {
-  for_each = aws_lambda_function.lambda
+  for_each = { for lambda in aws_lambda_function.lambda : lambda.function_name => lambda }
 
   api_id           = aws_apigatewayv2_api.api.id
   integration_type = "AWS_PROXY"
@@ -80,6 +80,6 @@ resource "aws_lambda_permission" "api_gw" {
     function_name = each.value.function_name
     principal     = "apigateway.amazonaws.com"
 
-    source_arn = join("",[aws_apigatewayv2_api.api.execution_arn,"/*/*",each.value.route],"/{proxy+}")
+    source_arn = join("",[aws_apigatewayv2_api.api.execution_arn,"/*/*",each.value.route, "/{proxy+}"])
 }
 
