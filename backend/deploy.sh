@@ -1,18 +1,16 @@
 #!/bin/bash
 
-FUNCTION_NAME="bandoru-lambda"
 PYTHON_VERSION="3.12"
 
-rm -f bundle.zip
+rm -f bundle.zip .bundle .deps
 
-mkdir -p .bundle
-mkdir -p .pip_cache
+mkdir -p .bundle .deps .pip_cache
 
 
 echo -e "\nInstalling requirements..."
 pip install \
     -r requirements.txt \
-    --target .bundle \
+    --target .deps \
     --platform manylinux2014_x86_64 \
     --implementation cp \
     --python-version $PYTHON_VERSION \
@@ -20,23 +18,26 @@ pip install \
     --cache-dir .pip_cache \
 
 
-echo -e "\nCopying files..."
-cp -R src/* .bundle/
+echo -e "\nDeploying..."
+cp -R src/shared .deps/* .bundle/
+for filename in ./src/*.py; do
+  function_name=${filename%.py}
 
-cd .bundle
+  cp "src/$filename" .bundle/lambda_function.py
 
-echo -e "\nZipping..."
-zip -q -x "*/__pycache__/*" -r ../bundle.zip .
+  cd .bundle
+  zip -q -x "*/__pycache__/*" -r ../bundle.zip .
+  cd ..
 
-cd ..
-
-echo -e "\nDeploying to AWS Lambda..."
-aws lambda update-function-code \
-    --function-name $FUNCTION_NAME \
+  aws lambda update-function-code \
+    --function-name "$function_name" \
     --zip-file fileb://./bundle.zip
 
+  rm -f ./bundle.zip ./bundle/lambda_function.py
+done
+
+
 echo -e "\nCleaning up..."
-rm -f bundle.zip
-rm -Rf .bundle
+rm -Rf bundle.zip .bundle
 
 echo -e "\nDone"
