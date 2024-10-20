@@ -68,16 +68,3 @@ resource "aws_cognito_user_pool_client" "default-client" {
   generate_secret                      = false
   prevent_user_existence_errors        = "ENABLED"
 }
-
-
-output "cognito_user_pool_id" {
-  value = aws_cognito_user_pool.pool.id
-}
-
-output "hosted_ui_client_id" {
-  value = aws_cognito_user_pool_client.default-client.id
-}
-
-output "cognito_domain" {
-  value = aws_cognito_user_pool_domain.main.domain
-}
