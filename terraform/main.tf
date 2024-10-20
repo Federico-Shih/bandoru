@@ -165,11 +165,13 @@ module "lambdas" {
   source = "./modules/lambda"
   lambda_role_arn = data.aws_iam_role.lab_role.arn
   lambda_configs = [{
-    function_name = "get-bandoru",
-    route = "/get-bandoru"
+    method = "GET"
+    function_name = "get-bandoru"
+    route = "/bandoru"
   }, {
-    function_name = "create-bandoru",
-    route = "/create-bandoru"
+    method = "POST"
+    function_name = "create-bandoru"
+    route = "/bandoru"
   }]
   #TODO: Add other env variables
   lambda_environment_variables = zipmap(["S3_BUCKET","USER_POOL_ID","APP_CLIENT_ID"],

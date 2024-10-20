@@ -6,6 +6,7 @@ variable "lambda_role_arn" {
 variable "lambda_configs" {
     description = "A list of names for the Lambda functions."
     type = list(object({
+      method = string
       function_name = string
       route = string
     }))
