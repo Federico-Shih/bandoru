@@ -13,7 +13,7 @@ cors_config = CORSConfig(allow_origin="*", allow_headers=["*"], expose_headers=[
 app = APIGatewayHttpResolver(enable_validation=True, cors=cors_config, debug=True)
 
 
-@app.post("/bandoru")
+@app.post("/")
 @tracer.capture_method
 def post_bandoru(form: CreateBandoruForm):
     return bandoru_service.create(form), 201

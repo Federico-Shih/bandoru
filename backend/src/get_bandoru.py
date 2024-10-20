@@ -14,7 +14,7 @@ cors_config = CORSConfig(allow_origin="*", allow_headers=["*"], expose_headers=[
 app = APIGatewayHttpResolver(enable_validation=True, cors=cors_config, debug=True)
 
 
-@app.get("/bandoru/<bandoru_id>")
+@app.get("/<bandoru_id>")
 @tracer.capture_method
 def get_bandoru(bandoru_id: str):
     bandoru = bandoru_service.get(bandoru_id)
