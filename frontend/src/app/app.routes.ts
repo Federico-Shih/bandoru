@@ -10,7 +10,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/view-bundle/view-bundle.component').then(m => m.ViewBundleComponent)
   },
   {
-    path: '404',
+    path: 'login-success',
+    loadComponent: () => import('./features/auth-callback/auth-callback.component').then(m => m.AuthCallbackComponent)
+  },
+  {
+    path: '**',
     loadComponent: () => import('./features/not-found/not-found.component').then(m => m.NotFoundComponent)
-  }
+  },
 ];
