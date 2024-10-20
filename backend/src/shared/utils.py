@@ -1,5 +1,6 @@
 import base64
 from uuid import UUID
+from boto3.dynamodb.types import TypeDeserializer
 
 
 def uuid4_to_base64(value: UUID):

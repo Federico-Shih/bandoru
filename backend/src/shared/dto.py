@@ -3,7 +3,7 @@ from typing import Optional
 
 from pydantic import BaseModel, UUID4
 
-from models import BandoruCurrent, FileCurrent
+from models import Bandoru, File
 from utils import uuid4_to_base64
 from bandoru_s3_bucket import get_file_url
 
@@ -13,7 +13,7 @@ class FileDTO(BaseModel):
     url:str
 
     @staticmethod
-    def from_model(model: FileCurrent):
+    def from_model(model: File):
         model_data = model.model_dump()
         model_data['id'] = uuid4_to_base64(model.id)
         model_data['url'] = get_file_url(model_data['id'],model.filename)
@@ -28,7 +28,7 @@ class BandoruDTO(BaseModel):
     last_modified: datetime
 
     @staticmethod
-    def from_model(model: BandoruCurrent):
+    def from_model(model: Bandoru):
         model_data = model.model_dump()
         model_data['id'] = uuid4_to_base64(model.id)
         model_data['files'] = [FileDTO.from_model(file) for file in model.files]
