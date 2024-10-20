@@ -160,7 +160,7 @@ resource "aws_vpc_security_group_egress_rule" "bandoru_lambda_sg_egress_rule" {
 }
 
 module "lambdas" {
-  depends_on = [module.vpc,aws_s3_bucket_website_configuration.spa-website-config]
+  depends_on = [module.vpc,aws_s3_bucket_website_configuration.spa-website-config,aws_cognito_user_pool_client.default-client]
   
   source = "./modules/lambda"
   lambda_role_arn = data.aws_iam_role.lab_role.arn
@@ -172,7 +172,8 @@ module "lambdas" {
     route = "/create-bandoru"
   }]
   #TODO: Add other env variables
-  lambda_environment_variables = zipmap(["S3_BUCKET"],[aws_s3_bucket.bandoru-bucket.id])
+  lambda_environment_variables = zipmap(["S3_BUCKET","USER_POOL_ID","APP_CLIENT_ID"],
+    [aws_s3_bucket.bandoru-bucket.id,aws_cognito_user_pool.pool.id,aws_cognito_user_pool_client.default-client.id])
   api_gw_name = "bandoru-api"
   vpc_subnets_ids = module.vpc.intra_subnets
   vpc_security_group_ids = [aws_security_group.bandoru_lambda_sg.id]

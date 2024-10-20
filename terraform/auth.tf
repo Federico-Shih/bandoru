@@ -65,7 +65,7 @@ resource "aws_cognito_user_pool_client" "default-client" {
   allowed_oauth_scopes                 = ["email", "openid"]
   explicit_auth_flows                  = ["ALLOW_REFRESH_TOKEN_AUTH", "ALLOW_USER_SRP_AUTH", "ALLOW_USER_PASSWORD_AUTH", "ALLOW_CUSTOM_AUTH"]
   supported_identity_providers         = ["COGNITO", aws_cognito_identity_provider.google_provider.provider_name]
-  generate_secret                      = true
+  generate_secret                      = false
   prevent_user_existence_errors        = "ENABLED"
 }
 
