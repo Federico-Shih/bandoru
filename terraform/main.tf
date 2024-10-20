@@ -100,10 +100,30 @@ resource "aws_vpc_endpoint" "s3" {
     Terraform = "true"
     Environment = "s3-endpoint"
   }
+}
+resource "aws_vpc_endpoint_policy" "s3_endpoint_policy" {
+  vpc_endpoint_id = aws_vpc_endpoint.s3.id
+  #Policy no ponemos porque defaultea a Full Access
+}
+resource "aws_vpc_endpoint" "dynamodb" {
+  vpc_id       = module.vpc.vpc_id
+  service_name = "com.amazonaws.us-east-1.dynamodb"
+  vpc_endpoint_type = "Gateway"
+
+  #Depende de la vpc
+  depends_on = [
+    module.vpc
+  ]
+
+  route_table_ids = module.vpc.intra_route_table_ids
+  tags = {
+    Terraform = "true"
+    Environment = "dynamodb-endpoint"
+  }
   #Que onda con la policy
 }
-resource "aws_vpc_endpoint_policy" "example" {
-  vpc_endpoint_id = aws_vpc_endpoint.s3.id
+resource "aws_vpc_endpoint_policy" "dynamodb_endpoint_policy" {
+  vpc_endpoint_id = aws_vpc_endpoint.dynamodb.id
   #Policy no ponemos porque defaultea a Full Access
 }
 
@@ -151,11 +171,11 @@ module "lambdas" {
     function_name = "create-bandoru",
     route = "/create-bandoru"
   }]
-  lambda_environment_variables = {
-
-  }
+  #TODO: Add other env variables
+  lambda_environment_variables = zipmap(["S3_BUCKET"],[aws_s3_bucket.bandoru-bucket.id])
   api_gw_name = "bandoru-api"
   vpc_subnets_ids = module.vpc.intra_subnets
   vpc_security_group_ids = [aws_security_group.bandoru_lambda_sg.id]
   allowed_origins = ["http://${aws_s3_bucket_website_configuration.spa-website-config.website_endpoint}"]
+  path_to_placeholder_zip = file("${path.module}/hello.zip")
 }

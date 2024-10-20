@@ -1,10 +1,10 @@
 
 resource "aws_lambda_function" "lambda" {
-    for_each = { for index, lambda in var.lambda_configs: lambda.function_name => lambda }
+    count = length(var.lambda_configs)
 
-    filename = "./hello.zip"
+    filename = var.path_to_placeholder_zip
  
-    function_name = each.value.function_name
+    function_name = var.lambda_configs[count.index].function_name
     role          = var.lambda_role_arn
     handler       = "lambda_function.lambda_handler"  
 
@@ -16,7 +16,7 @@ resource "aws_lambda_function" "lambda" {
 
     tags = {
         Terraform = "true"
-        Name = each.value.function_name
+        Name = var.lambda_configs[count.index].function_name
     }
 
     #Lo ponemos en una vpc, no es necesario especificar la vpc con id, con las subnets y SG basta
@@ -57,7 +57,7 @@ resource "aws_apigatewayv2_integration" "lambda_integration" {
 }
 
 resource "aws_apigatewayv2_route" "routes" {
-  for_each = { for index, lambda in var.lambda_configs: lambda.function_name => lambda }
+  for_each = { for lambda in var.lambda_configs: lambda.function_name => lambda }
 
   api_id    = aws_apigatewayv2_api.api.id
   route_key = "ANY ${each.value.route}/{proxy+}"
@@ -73,13 +73,13 @@ resource "aws_apigatewayv2_stage" "default" {
 
 resource "aws_lambda_permission" "api_gw" {
     
-    for_each = { for index, lambda in var.lambda_configs: lambda.function_name => lambda }
+    for_each = { for lambda in var.lambda_configs: lambda.function_name => lambda }
 
     statement_id  = "AllowExecutionFromAPIGateway"
     action        = "lambda:InvokeFunction"
     function_name = each.value.function_name
     principal     = "apigateway.amazonaws.com"
 
-    source_arn = "${aws_apigatewayv2_api.api.execution_arn}/*/*${each.value.route}/{proxy+}"
+    source_arn = join("",[aws_apigatewayv2_api.api.execution_arn,"/*/*",each.value.route],"/{proxy+}")
 }
 

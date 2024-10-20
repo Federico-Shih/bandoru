@@ -37,3 +37,6 @@ variable "allowed_origins" {
     description = "Origins for CORS"
     type = list(string)
 }
+variable "path_to_placeholder_zip"{
+    description = "The path to the code that will be in the lambda as a temporary placeholder."
+}
