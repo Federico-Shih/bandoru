@@ -13,7 +13,7 @@ cors_config = CORSConfig(allow_origin="*", allow_headers=["*"], expose_headers=[
 app = APIGatewayHttpResolver(enable_validation=True, cors=cors_config, debug=True)
 
 
-@app.get("/bandoru")
+@app.get("/")
 @tracer.capture_method
 def get_all_bandorus():
     bandorus = bandoru_service.get_all()
