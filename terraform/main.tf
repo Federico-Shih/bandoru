@@ -21,57 +21,57 @@ module "vpc" {
     Environment = "dev"
   }
 
-  # cosas para RDS que vamos a sacar:
-  database_subnets = ["10.0.30.0/24", "10.0.40.0/24"]
-  create_database_subnet_group = true
-  database_subnet_group_name = "rds_subnet_group"
-  database_subnet_names = ["rds_subnet_1", "rds_subnet_2"]
-  create_database_subnet_route_table = true
+  # # cosas para RDS que vamos a sacar:
+  # database_subnets = ["10.0.30.0/24", "10.0.40.0/24"]
+  # create_database_subnet_group = true
+  # database_subnet_group_name = "rds_subnet_group"
+  # database_subnet_names = ["rds_subnet_1", "rds_subnet_2"]
+  # create_database_subnet_route_table = true
   
 }
 
 # RDS
-resource "aws_security_group" "bandoru_db_sg" {
-  name = "bandoru-db-sg"
-  vpc_id = module.vpc.vpc_id
-  ingress {
-    from_port   = 5432
-    to_port     = 5432
-    protocol    = "tcp"
-    cidr_blocks = ["10.0.0.0/16"]
-  }
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  tags = {
-    Name = "bandoru-db-sg"
-  }
-}
+# resource "aws_security_group" "bandoru_db_sg" {
+#   name = "bandoru-db-sg"
+#   vpc_id = module.vpc.vpc_id
+#   ingress {
+#     from_port   = 5432
+#     to_port     = 5432
+#     protocol    = "tcp"
+#     cidr_blocks = ["10.0.0.0/16"]
+#   }
+#   egress {
+#     from_port   = 0
+#     to_port     = 0
+#     protocol    = "-1"
+#     cidr_blocks = ["0.0.0.0/0"]
+#   }
+#   tags = {
+#     Name = "bandoru-db-sg"
+#   }
+# }
 
-resource "aws_db_instance" "bandoru_db" {
-  allocated_storage    = 20
-  engine               = "postgres"
-  auto_minor_version_upgrade = true
-  engine_version       = "16.3"
-  instance_class       = "db.t4g.micro"
-  identifier           = "bandoru-db"
-  username             = "postgres"
-  password             = "lechugapasion"
-  db_subnet_group_name = module.vpc.database_subnet_group
-  vpc_security_group_ids = [aws_security_group.bandoru_db_sg.id]
-  skip_final_snapshot  = true
-  publicly_accessible  = false
-  availability_zone    = "us-east-1a"
-  apply_immediately = true
-  
-
-  tags = {
-    Name = "bandoru-db"
-  }
-}
+# resource "aws_db_instance" "bandoru_db" {
+#   allocated_storage    = 20
+#   engine               = "postgres"
+#   auto_minor_version_upgrade = true
+#   engine_version       = "16.3"
+#   instance_class       = "db.t4g.micro"
+#   identifier           = "bandoru-db"
+#   username             = "postgres"
+#   password             = "lechugapasion"
+#   db_subnet_group_name = module.vpc.database_subnet_group
+#   vpc_security_group_ids = [aws_security_group.bandoru_db_sg.id]
+#   skip_final_snapshot  = true
+#   publicly_accessible  = false
+#   availability_zone    = "us-east-1a"
+#   apply_immediately = true
+#
+#
+#   tags = {
+#     Name = "bandoru-db"
+#   }
+# }
 
 
 # route table, lambda-route-table
