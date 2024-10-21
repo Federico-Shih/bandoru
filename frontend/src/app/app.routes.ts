@@ -1,4 +1,6 @@
 import { Routes } from '@angular/router';
+import {codeExtractorGuard} from "./shared/guards/code-extractor/code-extractor.guard";
+import {logoutGuard} from "./shared/guards/logout/logout.guard";
 
 export const routes: Routes = [
   {
@@ -11,7 +13,13 @@ export const routes: Routes = [
   },
   {
     path: 'login-success',
-    loadComponent: () => import('./features/auth-callback/auth-callback.component').then(m => m.AuthCallbackComponent)
+    loadComponent: () => import('./features/auth-callback/auth-callback.component').then(m => m.AuthCallbackComponent),
+    canActivate: [codeExtractorGuard]
+  },
+  {
+    path: 'logout',
+    loadComponent: () => import('./features/auth-callback/auth-callback.component').then(m => m.AuthCallbackComponent),
+    canActivate: [logoutGuard],
   },
   {
     path: '**',
