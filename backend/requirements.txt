@@ -1,2 +1,2 @@
-cognitojwt
+cognitojwt[sync]
 pydantic~=2.9.2
