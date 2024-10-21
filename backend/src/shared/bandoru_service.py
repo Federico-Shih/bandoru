@@ -20,7 +20,7 @@ def create(form: CreateBandoruForm,logged_username:Optional[str] = None) -> dict
     bandoru = form.model_dump()
     bandoru["id"] = uuid4_to_base64(uuid4())
     pk = f"BANDORU#{bandoru['id']}"
-    bandoru["files"] = files
+    bandoru["files"] = [file.model_dump() for file in files]
     bandoru["created_at"] = bandoru["last_modified"] = timestamp
 
     if logged_username is not None:
