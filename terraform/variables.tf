@@ -29,3 +29,8 @@ variable "aws-profile" {
 variable "allowed-cognito-callback-url" {
   type = list(string)
 }
+
+variable "dynamodb-table-name" {
+  type = string
+}
+

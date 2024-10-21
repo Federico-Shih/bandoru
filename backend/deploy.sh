@@ -2,7 +2,7 @@
 
 PYTHON_VERSION="3.12"
 
-rm -f bundle.zip .bundle .deps
+rm -Rf bundle.zip .bundle .deps
 
 mkdir -p .bundle .deps .pip_cache
 
@@ -20,16 +20,18 @@ pip install \
 
 echo -e "\nDeploying..."
 cp -R src/shared .deps/* .bundle/
-for filename in ./src/*.py; do
+for filepath in ./src/*.py; do
+  filename="${filepath##*/}"
   function_name=${filename%.py}
 
-  cp "src/$filename" .bundle/lambda_function.py
+  cp "$filepath" .bundle/lambda_function.py
 
   cd .bundle
   zip -q -x "*/__pycache__/*" -r ../bundle.zip .
   cd ..
 
   aws lambda update-function-code \
+    --no-cli-pager \
     --function-name "$function_name" \
     --zip-file fileb://./bundle.zip
 

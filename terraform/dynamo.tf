@@ -1,9 +1,9 @@
 module "dynamodb_table" {
-  source   = "terraform-aws-modules/dynamodb-table/aws"
+  source = "terraform-aws-modules/dynamodb-table/aws"
 
-  name             = "BandoruTable"
-  hash_key         = "PK"
-  range_key        = "SK"
+  name      = var.dynamodb-table-name
+  hash_key  = "PK"
+  range_key = "SK"
 
 
   attributes = [
@@ -27,13 +27,14 @@ module "dynamodb_table" {
 
   global_secondary_indexes = [
     {
-      name               = "bandoru-by-user"
-      hash_key           = "GSI1PK"
-      range_key          = "GSI1SK"
-      projection_type    = "ALL"
+      name            = "bandoru-by-user"
+      hash_key        = "GSI1PK"
+      range_key       = "GSI1SK"
+      projection_type = "ALL"
     }
   ]
   tags = {
     Terraform = "true"
   }
 }
+

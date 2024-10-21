@@ -1,23 +1,23 @@
 module "vpc" {
-  source = "terraform-aws-modules/vpc/aws"
+  source  = "terraform-aws-modules/vpc/aws"
   version = "5.13.0"
 
   name = "bandoru-vpc"
   cidr = "10.0.0.0/16"
 
-  azs             = ["us-east-1a", "us-east-1b"]
-  intra_subnets = ["10.0.10.0/24", "10.0.20.0/24"] # private subnet with no igw
+  azs                = ["us-east-1a", "us-east-1b"]
+  intra_subnets      = ["10.0.10.0/24", "10.0.20.0/24"] # private subnet with no igw
   intra_subnet_names = ["lambda_subnet_1", "lambda_subnet_2"]
-  
+
 
   enable_nat_gateway = false
   enable_vpn_gateway = false
 
   enable_dns_hostnames = true
-  create_igw = false
+  create_igw           = false
 
   tags = {
-    Terraform = "true"
+    Terraform   = "true"
     Environment = "dev"
   }
 
@@ -27,7 +27,7 @@ module "vpc" {
   # database_subnet_group_name = "rds_subnet_group"
   # database_subnet_names = ["rds_subnet_1", "rds_subnet_2"]
   # create_database_subnet_route_table = true
-  
+
 }
 
 # RDS
@@ -86,8 +86,8 @@ module "vpc" {
 # Policy = Full access
 
 resource "aws_vpc_endpoint" "s3" {
-  vpc_id       = module.vpc.vpc_id
-  service_name = "com.amazonaws.us-east-1.s3"
+  vpc_id            = module.vpc.vpc_id
+  service_name      = "com.amazonaws.us-east-1.s3"
   vpc_endpoint_type = "Gateway"
 
   #Depende de la vpc
@@ -97,7 +97,7 @@ resource "aws_vpc_endpoint" "s3" {
 
   route_table_ids = module.vpc.intra_route_table_ids
   tags = {
-    Terraform = "true"
+    Terraform   = "true"
     Environment = "s3-endpoint"
   }
 }
@@ -106,8 +106,8 @@ resource "aws_vpc_endpoint_policy" "s3_endpoint_policy" {
   #Policy no ponemos porque defaultea a Full Access
 }
 resource "aws_vpc_endpoint" "dynamodb" {
-  vpc_id       = module.vpc.vpc_id
-  service_name = "com.amazonaws.us-east-1.dynamodb"
+  vpc_id            = module.vpc.vpc_id
+  service_name      = "com.amazonaws.us-east-1.dynamodb"
   vpc_endpoint_type = "Gateway"
 
   #Depende de la vpc
@@ -117,7 +117,7 @@ resource "aws_vpc_endpoint" "dynamodb" {
 
   route_table_ids = module.vpc.intra_route_table_ids
   tags = {
-    Terraform = "true"
+    Terraform   = "true"
     Environment = "dynamodb-endpoint"
   }
   #Que onda con la policy
@@ -135,10 +135,10 @@ resource "aws_vpc_endpoint_policy" "dynamodb_endpoint_policy" {
 
 # Module para levantar multiples lambdas
 
-# API Gateway 
+# API Gateway
 
 resource "aws_security_group" "bandoru_lambda_sg" {
-  name = "bandoru-lambda-sg"
+  name   = "bandoru-lambda-sg"
   vpc_id = module.vpc.vpc_id
   tags = {
     Name = "bandoru-lambda-sg"
@@ -149,38 +149,34 @@ resource "aws_vpc_security_group_ingress_rule" "bandoru_lambda_sg_ingress_rule" 
   security_group_id = aws_security_group.bandoru_lambda_sg.id
 
   ip_protocol = -1
-  cidr_ipv4 = "0.0.0.0/0"
+  cidr_ipv4   = "0.0.0.0/0"
 }
 
 resource "aws_vpc_security_group_egress_rule" "bandoru_lambda_sg_egress_rule" {
   security_group_id = aws_security_group.bandoru_lambda_sg.id
 
   ip_protocol = -1
-  cidr_ipv4 = "0.0.0.0/0"
+  cidr_ipv4   = "0.0.0.0/0"
 }
 
 module "lambdas" {
-  depends_on = [module.vpc,aws_s3_bucket_website_configuration.spa-website-config,aws_cognito_user_pool_client.default-client]
-  
-  source = "./modules/lambda"
+  depends_on = [module.vpc, aws_s3_bucket_website_configuration.spa-website-config, aws_cognito_user_pool_client.default-client]
+
+  source          = "./modules/lambda"
   lambda_role_arn = data.aws_iam_role.lab_role.arn
   lambda_configs = [{
-    method = "GET"
-    function_name = "get-all-bandorus"
-    route = "/bandoru"
-  }, {
-    method = "POST"
-    function_name = "post-bandoru"
-    route = "/bandoru"
-  }, {
-    method = "GET"
-    function_name = "get-bandoru"
-    route = "/bandoru/{proxy+}"
+    method        = "POST"
+    function_name = "post_bandoru"
+    route         = "/bandoru"
+    }, {
+    method        = "GET"
+    function_name = "get_bandoru"
+    route         = "/bandoru/{id}"
   }]
   #TODO: Add other env variables
   lambda_environment_variables = zipmap(
-    ["S3_BUCKET","USER_POOL_ID","APP_CLIENT_ID", "DB_TABLE"],
-    [aws_s3_bucket.bandoru-bucket.id,aws_cognito_user_pool.pool.id,aws_cognito_user_pool_client.default-client.id,module.dynamodb_table.name]
+    ["S3_BUCKET", "USER_POOL_ID", "APP_CLIENT_ID", "DB_TABLE"],
+    [aws_s3_bucket.bandoru-bucket.id, aws_cognito_user_pool.pool.id, aws_cognito_user_pool_client.default-client.id, var.dynamodb-table-name]
   )
   api_gw_name = "bandoru-api"
   vpc_subnets_ids = module.vpc.intra_subnets
