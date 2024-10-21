@@ -128,3 +128,36 @@ resource "aws_s3_bucket_website_configuration" "spa-website-config" {
     key = "index.html"
   }
 }
+
+resource "aws_apigatewayv2_api" "spa-proxy" {
+    name = "bandoru-spa-proxy"
+    protocol_type = "HTTP"
+}
+
+resource "aws_apigatewayv2_integration" "spa-proxy-integration" {
+
+  api_id           = aws_apigatewayv2_api.spa-proxy.id
+  integration_type = "HTTP_PROXY"
+  connection_type           = "INTERNET"
+  integration_method        = "GET"
+
+  integration_uri           = "http://${aws_s3_bucket_website_configuration.spa-website-config.website_endpoint}/" # S3 URI with path proxying
+  passthrough_behavior      = "WHEN_NO_MATCH"
+
+  request_parameters = {
+    "overwrite:path" = "$request.path"
+  }
+}
+
+resource "aws_apigatewayv2_route" "proxy_route" {
+  depends_on = [aws_apigatewayv2_integration.spa-proxy-integration]
+  api_id    = aws_apigatewayv2_api.spa-proxy.id
+  route_key = "GET /{proxy+}"
+  target = "integrations/${aws_apigatewayv2_integration.spa-proxy-integration.id}"
+}
+
+resource "aws_apigatewayv2_stage" "api_stage" {
+  api_id      = aws_apigatewayv2_api.spa-proxy.id
+  name        = "$default"
+  auto_deploy = true
+}

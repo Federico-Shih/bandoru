@@ -14,6 +14,9 @@ output "api_gw_endpoint" {
   value = module.lambdas.api_gw_endpoint
 }
 output "spa_s3_url" {
-  value = aws_s3_bucket.bandoru-spa.bucket_domain_name
+  value = "http://${aws_s3_bucket_website_configuration.spa-website-config.website_endpoint}"
+}
+output "spa_s3_proxy" {
+  value = aws_apigatewayv2_api.spa-proxy.api_endpoint
 }
 
