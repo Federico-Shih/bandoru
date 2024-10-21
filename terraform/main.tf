@@ -5,16 +5,20 @@ module "vpc" {
   name = "bandoru-vpc"
   cidr = "10.0.0.0/16"
 
-  azs                = ["us-east-1a", "us-east-1b"]
-  intra_subnets      = ["10.0.10.0/24", "10.0.20.0/24"] # private subnet with no igw
-  intra_subnet_names = ["lambda_subnet_1", "lambda_subnet_2"]
+  azs = ["us-east-1a", "us-east-1b"]
+
+  public_subnets      = ["10.0.110.0/24", "10.0.120.0/24"]
+  public_subnet_names = ["public_subnet_1", "public_subnet_2"]
+
+  private_subnets      = ["10.0.10.0/24", "10.0.20.0/24"] # private subnet with nat gw
+  private_subnet_names = ["lambda_subnet_1", "lambda_subnet_2"]
 
 
-  enable_nat_gateway = false
+  enable_nat_gateway = true
   enable_vpn_gateway = false
 
   enable_dns_hostnames = true
-  create_igw           = false
+  create_igw           = true
 
   tags = {
     Terraform   = "true"
@@ -178,9 +182,9 @@ module "lambdas" {
     ["S3_BUCKET", "USER_POOL_ID", "APP_CLIENT_ID", "DB_TABLE"],
     [aws_s3_bucket.bandoru-bucket.id, aws_cognito_user_pool.pool.id, aws_cognito_user_pool_client.default-client.id, var.dynamodb-table-name]
   )
-  api_gw_name = "bandoru-api"
-  vpc_subnets_ids = module.vpc.intra_subnets
-  vpc_security_group_ids = [aws_security_group.bandoru_lambda_sg.id]
-  allowed_origins = ["http://${aws_s3_bucket_website_configuration.spa-website-config.website_endpoint}",aws_apigatewayv2_api.spa-proxy.api_endpoint]
+  api_gw_name             = "bandoru-api"
+  vpc_subnets_ids         = module.vpc.private_subnets
+  vpc_security_group_ids  = [aws_security_group.bandoru_lambda_sg.id]
+  allowed_origins         = ["http://${aws_s3_bucket_website_configuration.spa-website-config.website_endpoint}", aws_apigatewayv2_api.spa-proxy.api_endpoint]
   path_to_placeholder_zip = "${abspath(path.root)}/hello.zip"
 }
