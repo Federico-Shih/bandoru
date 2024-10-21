@@ -10,6 +10,8 @@ class File(BaseModel):
 class Bandoru(BaseModel):
     id: str
     files: list[File]
+    owner_id: Optional[str] = None
+    private: bool = False
     description: Optional[str] = None
     parent_id: Optional[UUID4] = None
     created_at: int
