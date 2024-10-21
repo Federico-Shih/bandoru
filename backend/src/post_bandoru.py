@@ -6,6 +6,7 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 from shared import bandoru_service
 from shared.forms import CreateBandoruForm
 from shared.auth_jwt import get_username_from_token
+
 tracer = Tracer()
 logger = Logger()
 
@@ -16,7 +17,10 @@ app = APIGatewayHttpResolver(enable_validation=True, cors=cors_config, debug=Tru
 @app.post("/bandoru")
 @tracer.capture_method
 def post_bandoru(form: CreateBandoruForm):
-    return bandoru_service.create(form,get_username_from_token(app.current_event.headers.get('Authorization', ''))), 201
+    auth_header = app.current_event.headers.get('Authorization', None)
+    token = auth_header.split(" ")[1] if auth_header else None
+    username = get_username_from_token(token) if token else None
+    return bandoru_service.create(form, username), 201
 
 
 @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_HTTP)
