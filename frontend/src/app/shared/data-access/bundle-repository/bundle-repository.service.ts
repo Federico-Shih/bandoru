@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
-import {HttpClient} from "@angular/common/http";
+import {HttpClient, HttpContext} from "@angular/common/http";
 import {BundleFormDto} from "../../models/BundlePostDto";
 import {BundleGetResponse, BundleUploadResponse, PresignedUrlResponse} from "../../models/Bundle";
 
 import {environment} from "../../../../environments/environment";
 import { Observable } from 'rxjs';
+import { WITHOUT_AUTH } from '../../interceptors/add-token.interceptor';
 
 const API_URL = environment.apiUrl;
 
@@ -36,12 +37,15 @@ export class BundleRepository {
 
     formData.append('file', file);
 
-    return this.httpClient.post(url.url, formData);
+    return this.httpClient.post(url.url, formData, {
+      context: new HttpContext().set(WITHOUT_AUTH, true)
+    });
   }
 
   downloadFile(url: string): Observable<ArrayBuffer> {
     return this.httpClient.get(url, {
-      responseType: "arraybuffer"
+      responseType: "arraybuffer",
+      context: new HttpContext().set(WITHOUT_AUTH, true)
     });
   }
 }
