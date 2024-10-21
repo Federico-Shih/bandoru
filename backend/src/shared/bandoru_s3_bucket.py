@@ -11,7 +11,6 @@ s3 = boto3.client('s3')
 
 def create_file_post_url(file_id: str, filename: str) -> dict:
     conditions = [
-        {"acl": "public-read"},
         ["content-length-range", 1, max_file_size],
     ]
 

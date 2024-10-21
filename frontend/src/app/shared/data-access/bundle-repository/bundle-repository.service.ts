@@ -30,8 +30,6 @@ export class BundleRepository {
   uploadFile(url: PresignedUrlResponse, file: File) {
     const formData = new FormData();
 
-    formData.append('acl', 'public-read');
-
     for (const key in url.fields) {
       formData.append(key, url.fields[key]);
     }
