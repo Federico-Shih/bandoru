@@ -1,6 +1,8 @@
 from datetime import datetime
 from typing import Optional
 from uuid import uuid4
+from aws_lambda_powertools.event_handler.exceptions import *
+from aws_lambda_powertools import Tracer, Logger
 
 from shared import database
 from shared.bandoru_s3_bucket import create_file_post_url
@@ -8,6 +10,7 @@ from shared.forms import CreateBandoruForm
 from shared.models import File, Bandoru
 from shared.utils import uuid4_to_base64, uuid4_from_base64
 
+logger = Logger()
 
 def create(form: CreateBandoruForm,logged_username:Optional[str] = None) -> dict:
     logger.debug("Start Create")
@@ -18,13 +21,16 @@ def create(form: CreateBandoruForm,logged_username:Optional[str] = None) -> dict
     bandoru["id"] = uuid4_to_base64(uuid4())
     pk = f"BANDORU#{bandoru['id']}"
     bandoru["files"] = files
+    bandoru["created_at"] = bandoru["last_modified"] = timestamp
 
-    timestamp=int(round(datetime.now().timestamp()))
-    bandoru = Bandoru(**bandoru, created_at=timestamp, last_modified=timestamp)
+    if logged_username is not None:
+        bandoru["owner_id"] = logged_username
+        bandoru["GSI1PK"] = f"USER#{logged_username}"
+        bandoru["GSI1SK"] = pk
 
     urls: list[dict] = []
 
-    database.put_item(f"BANDORU#{bandoru.id}", None, bandoru.model_dump())
+    database.put_item(pk, None, bandoru)
 
     # Presigned URLs for each file
     for file in files:
