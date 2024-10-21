@@ -177,6 +177,6 @@ module "lambdas" {
   api_gw_name = "bandoru-api"
   vpc_subnets_ids = module.vpc.intra_subnets
   vpc_security_group_ids = [aws_security_group.bandoru_lambda_sg.id]
-  allowed_origins = ["http://${aws_s3_bucket_website_configuration.spa-website-config.website_endpoint}"]
+  allowed_origins = ["http://${aws_s3_bucket_website_configuration.spa-website-config.website_endpoint}",aws_apigatewayv2_api.spa-proxy.api_endpoint]
   path_to_placeholder_zip = "${abspath(path.root)}/hello.zip"
 }

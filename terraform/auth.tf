@@ -59,7 +59,7 @@ resource "aws_cognito_user_pool_client" "default-client" {
   name = "bandoru-client"
 
   user_pool_id                         = aws_cognito_user_pool.pool.id
-  callback_urls                        = var.allowed-cognito-callback-url
+  callback_urls                        = ["${aws_apigatewayv2_api.spa-proxy.api_endpoint}/login-success",var.allowed_localhost_url]
   allowed_oauth_flows_user_pool_client = true
   allowed_oauth_flows                  = ["code", "implicit"]
   allowed_oauth_scopes                 = ["email", "openid"]
