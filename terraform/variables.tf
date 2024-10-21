@@ -25,3 +25,7 @@ variable "allowed_localhost_url" {
 variable "aws-profile" {
   type = string
 }
+
+variable "allowed-cognito-callback-url" {
+  type = list(string)
+}

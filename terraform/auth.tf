@@ -39,7 +39,7 @@ resource "aws_cognito_identity_provider" "google_provider" {
   provider_type = "Google"
 
   provider_details = {
-    authorize_scopes = "email"
+    authorize_scopes = "openid email"
     client_id        = var.google_idp_client_id
     client_secret    = var.google_idp_client_secret
   }
@@ -59,7 +59,7 @@ resource "aws_cognito_user_pool_client" "default-client" {
   name = "bandoru-client"
 
   user_pool_id                         = aws_cognito_user_pool.pool.id
-  callback_urls                        = ["${aws_apigatewayv2_api.spa-proxy.api_endpoint}/login-success",var.allowed_localhost_url]
+  callback_urls                        = concat(["${aws_apigatewayv2_api.spa-proxy.api_endpoint}/login-success", var.allowed_localhost_url], var.allowed-cognito-callback-url)
   allowed_oauth_flows_user_pool_client = true
   allowed_oauth_flows                  = ["code", "implicit"]
   allowed_oauth_scopes                 = ["email", "openid"]
