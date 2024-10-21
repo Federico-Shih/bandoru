@@ -1,4 +1,4 @@
-import {HttpInterceptorFn, HttpRequest} from '@angular/common/http';
+import {HttpContextToken, HttpInterceptorFn, HttpRequest} from '@angular/common/http';
 import {catchError, Subject, switchMap} from "rxjs";
 import {AuthService} from "../data-access/auth-service/auth.service";
 import {inject} from "@angular/core";
@@ -6,10 +6,17 @@ import {inject} from "@angular/core";
 let isRefreshing = false;
 const isRefreshingNotification: Subject<string | null> = new Subject<string | null>();
 
+export const WITHOUT_AUTH = new HttpContextToken(() => false);
+
 // TODO: redirect to login on 401 after failed refresh
 export const addTokenInterceptor: HttpInterceptorFn = (req, next) => {
+  const withoutAuth = req.context.get(WITHOUT_AUTH);
+  if (withoutAuth) {
+    return next(req);
+  }
   const request = addToken(req, localStorage.getItem('id_token'));
   const authService = inject(AuthService);
+
   return next(request).pipe(catchError((err) => {
     if (err?.status === 401) {
       // Retry with refresh token
