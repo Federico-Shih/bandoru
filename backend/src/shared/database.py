@@ -10,7 +10,7 @@ serializer = TypeSerializer()
 db_table = os.environ["DB_TABLE"]
 dynamo = boto3.client("dynamodb")
 
-def put_item(pk: str, sk: str, data: dict) -> dict:
+def put_item(pk: str, sk: Optional[str], data: dict) -> dict:
     serialized = {k: serializer.serialize(v) for k, v in data.items()}
 
     serialized["PK"] = serializer.serialize(pk)
