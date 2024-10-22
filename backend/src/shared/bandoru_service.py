@@ -12,10 +12,13 @@ from shared.utils import uuid4_to_base64, uuid4_from_base64
 
 logger = Logger()
 
-def create(form: CreateBandoruForm,logged_username:Optional[str] = None) -> dict:
+
+def create(form: CreateBandoruForm, logged_username: Optional[str] = None) -> dict:
     logger.debug("Start Create")
 
-    files = [File(**file.model_dump(), id=uuid4_to_base64(uuid4())) for file in form.files]
+    files = [
+        File(**file.model_dump(), id=uuid4_to_base64(uuid4())) for file in form.files
+    ]
     timestamp = int(round(datetime.now().timestamp()))
     bandoru = form.model_dump()
     bandoru["id"] = uuid4_to_base64(uuid4())
@@ -37,12 +40,10 @@ def create(form: CreateBandoruForm,logged_username:Optional[str] = None) -> dict
         file_id = file.id
         urls.append(create_file_post_url(file_id, file.filename))
 
-    return {
-        'bandoru_id': bandoru['id'],
-        'post_urls': urls
-    }
+    return {"bandoru_id": bandoru["id"], "post_urls": urls}
 
-def get(bandoru_id: str,logged_username:Optional[str] = None) -> Optional[Bandoru]:
+
+def get(bandoru_id: str, logged_username: Optional[str] = None) -> Optional[Bandoru]:
     bandoru: Optional[Bandoru] = None
 
     item = database.get_item(f"BANDORU#{bandoru_id}")
@@ -51,4 +52,3 @@ def get(bandoru_id: str,logged_username:Optional[str] = None) -> Optional[Bandor
         if bandoru.private and bandoru.owner_id != logged_username:
             raise ServiceError(403, "Forbidden")
     return bandoru
-

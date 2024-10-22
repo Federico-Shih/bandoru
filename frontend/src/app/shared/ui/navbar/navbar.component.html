@@ -54,8 +54,11 @@
   <div class="navbar-end flex gap-3">
     <ng-container *ngIf="(user$ | async) as user; else loading">
       @if (user == NO_USER) {
-        <a class="btn btn-secondary w-[90px]" [href]="SIGNIN_URL" target="_blank">Log in</a>
-        <a class="btn btn-primary w-[90px]" [href]="SIGNUP_URL" target="_blank">Sign up</a>
+        <button class="btn btn-secondary w-[90px]" (click)="authModal.openDialog('login')">Log in</button>
+        <button class="btn btn-primary w-[90px]" (click)="authModal.openDialog('signup')">Sign up</button>
+
+        <!--        <a class="btn btn-secondary w-[90px]" [href]="SIGNIN_URL" target="_blank">Log in</a>-->
+<!--        <a class="btn btn-primary w-[90px]" [href]="SIGNUP_URL" target="_blank">Sign up</a>-->
       } @else {
         <details class="dropdown dropdown-end">
           <summary class="btn btn-primary m-1">
@@ -92,5 +95,6 @@
       </div>
     </ng-template>
     <a class="btn btn-accent" href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank">Say hi</a>
+    <app-auth-modal></app-auth-modal>
   </div>
 </div>

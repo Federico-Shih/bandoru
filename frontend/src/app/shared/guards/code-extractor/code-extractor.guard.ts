@@ -11,7 +11,9 @@ export const codeExtractorGuard: CanActivateFn = (route, state) => {
   if (authCode == null) {
     return router.navigate(['/']).then(() => false);
   }
-  return authService.getCodeGrantToken(authCode, window.location.origin + state.url.split('?')[0])
-    .pipe(switchMap(() => from(router.navigate(['/'])).pipe(map(() => true))))
-    .pipe(catchError(() => from(router.navigate(['/'])).pipe(map(() => false))));
+  return router.navigate(['/']).then(() => false);
+
+  // return authService.getCodeGrantToken(authCode, window.location.origin + state.url.split('?')[0])
+  //   .pipe(switchMap(() => from(router.navigate(['/'])).pipe(map(() => true))))
+  //   .pipe(catchError(() => from(router.navigate(['/'])).pipe(map(() => false))));
 };
