@@ -2,9 +2,9 @@
 
 PYTHON_VERSION="3.12"
 
-rm -Rf bundle.zip .bundle .deps
+rm -Rf bundle.zip .bundle .deps &> /dev/null
 
-mkdir -p .bundle .deps .pip_cache
+mkdir -p .bundle .deps .pip_cache &> /dev/null
 
 
 echo -e "\nInstalling requirements..."

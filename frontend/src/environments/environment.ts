@@ -1,5 +1,6 @@
 export const environment = {
-  apiUrl: 'https://qi0ezmdksf.execute-api.us-east-1.amazonaws.com',
-  cognitoClientId: '18s83l1p0forf4b3djduh77mt8',
-  cognitoDomain: 'https://bandoru-61306.auth.us-east-1.amazoncognito.com'
+  apiUrl: 'https://3x13an4lmk.execute-api.us-east-1.amazonaws.com/',
+  cognitoClientId: '4khr3vn0msg7ak12q1cedtii4u',
+  cognitoUserPoolId: 'us-east-1_SkHPQaS3X',
+  region: 'us-east-1',
 };

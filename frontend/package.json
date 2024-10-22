@@ -18,6 +18,8 @@
     "@angular/platform-browser": "^18.2.5",
     "@angular/platform-browser-dynamic": "^18.2.5",
     "@angular/router": "^18.2.5",
+    "@aws-amplify/ui-angular": "^5.0.29",
+    "aws-amplify": "^6.6.6",
     "jwt-decode": "^4.0.0",
     "monaco-editor": "^0.52.0",
     "ngx-monaco-editor-v2": "^18.1.0",

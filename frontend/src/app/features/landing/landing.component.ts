@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component, ViewChild} from '@angular/core';
 import {asFormControl, BundleFormType, SaveBundleFormService} from "../../shared/state/save-bundle-form/save-bundle-form.service";
 import {BundleEditorComponent} from "../../shared/ui/bundle-editor/bundle-editor.component";
 import {BundleMetadataEditorComponent} from "../../shared/ui/bundle-metadata-editor/bundle-metadata-editor.component";
@@ -8,6 +8,7 @@ import {AbstractControl, FormArray, FormGroup, ReactiveFormsModule} from "@angul
 import {Router} from "@angular/router";
 import {ToastService} from "../../shared/state/toast/toast.service";
 import {JsonPipe} from "@angular/common";
+import {AuthModalComponent} from "../../shared/ui/auth-modal/auth-modal.component";
 
 enum State {
   OK,
@@ -21,7 +22,8 @@ enum State {
     BundleEditorComponent,
     BundleMetadataEditorComponent,
     ReactiveFormsModule,
-    JsonPipe
+    JsonPipe,
+    AuthModalComponent
   ],
   templateUrl: './landing.component.html',
   styleUrl: './landing.component.scss',
