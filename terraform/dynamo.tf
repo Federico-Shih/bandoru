@@ -27,7 +27,7 @@ module "dynamodb_table" {
 
   global_secondary_indexes = [
     {
-      name            = "bandoru-by-user"
+      name            = var.dynamodb-user-idx
       hash_key        = "GSI1PK"
       range_key       = "GSI1SK"
       projection_type = "ALL"

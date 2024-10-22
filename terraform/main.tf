@@ -168,19 +168,28 @@ module "lambdas" {
 
   source          = "./modules/lambda"
   lambda_role_arn = data.aws_iam_role.lab_role.arn
-  lambda_configs = [{
-    method        = "POST"
-    function_name = "post_bandoru"
-    route         = "/bandoru"
-    }, {
-    method        = "GET"
-    function_name = "get_bandoru"
-    route         = "/bandoru/{id}"
-  }]
+  lambda_configs = [
+    {
+      method        = "POST"
+      function_name = "post_bandoru"
+      route         = "/bandoru"
+    },
+    {
+      method        = "GET"
+      function_name = "get_bandorus"
+      route         = "/bandoru"
+    },
+    {
+      method        = "GET"
+      function_name = "get_bandoru"
+      route         = "/bandoru/{id}"
+    },
+  ]
+
   #TODO: Add other env variables
   lambda_environment_variables = zipmap(
-    ["S3_BUCKET", "USER_POOL_ID", "APP_CLIENT_ID", "DB_TABLE"],
-    [aws_s3_bucket.bandoru-bucket.id, aws_cognito_user_pool.pool.id, aws_cognito_user_pool_client.default-client.id, var.dynamodb-table-name]
+    ["S3_BUCKET", "USER_POOL_ID", "APP_CLIENT_ID", "DB_TABLE", "DB_USER_IDX"],
+    [aws_s3_bucket.bandoru-bucket.id, aws_cognito_user_pool.pool.id, aws_cognito_user_pool_client.default-client.id, var.dynamodb-table-name, var.dynamodb-user-idx]
   )
   api_gw_name             = "bandoru-api"
   vpc_subnets_ids         = module.vpc.private_subnets

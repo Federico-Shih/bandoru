@@ -26,3 +26,10 @@ def get_jwt_claims(token: str) -> dict:
 def get_username_from_token(token: str) -> Optional[str]:
     claims = get_jwt_claims(token)
     return claims.get('cognito:username', None)
+
+def get_username_from_headers(headers: dict[str,str]) -> Optional[str]:
+    auth_header = headers.get('Authorization', None)
+    splitted = auth_header.split(" ") if auth_header else None
+    token = auth_header.split(" ")[1] if splitted and len(splitted) > 1 else None
+
+    return get_username_from_token(token) if token else None
