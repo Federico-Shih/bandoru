@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import {catchError, from, Observable, of, ReplaySubject, tap} from "rxjs";
+import {catchError, filter, from, map, Observable, of, ReplaySubject, tap} from "rxjs";
 import {OAuthClaims, OAuthFromCodeToken, OAuthFromRefreshToken} from "../../models/OAuth";
 import {HttpClient} from "@angular/common/http";
 import {environment} from "../../../../environments/environment";
@@ -90,5 +90,10 @@ export class AuthService {
 
   public getAuthUser(): Observable<User | NoUser> {
     return this.loggedInUser.asObservable();
+  }
+
+  // Should only be used for authenticated sessions
+  public getUser(): Observable<User> {
+    return this.loggedInUser.pipe(filter((user) => user !== NO_USER));
   }
 }

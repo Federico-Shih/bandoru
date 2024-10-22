@@ -20,5 +20,5 @@ export type BundleGetResponse = {
 export type BundleFileGetResponse = {
   id: string;
   filename: string;
-  url: string;
+  url?: string;
 }
