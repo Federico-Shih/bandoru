@@ -34,3 +34,7 @@ variable "dynamodb-table-name" {
   type = string
 }
 
+variable "dynamodb-user-idx" {
+  type = string
+}
+
