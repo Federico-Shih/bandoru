@@ -1,4 +1,4 @@
-<form [formGroup]="bundleForm" novalidate (submit)="uploadBundle(bundleForm)" class="mb-14">
+<form [formGroup]="bundleForm" novalidate class="mb-14">
   <div class="p-3 w-full grid grid-cols-12 gap-x-4 auto-rows-max gap-y-4 relative">
     <aside class="col-span-12 md:col-span-3">
       <div class="md:hidden collapse collapse-arrow border-gray-700 border flex-shrink-0">
@@ -26,8 +26,50 @@
       <section class="flex flex-row">
         <button class="btn btn-primary" type="button" (click)="addFile()">Add File</button>
         <div class="flex-1"></div>
-        <button type="submit" class="btn btn-success" [class]="state === UIState.SENDING ? 'loading':''" >Share</button>
+        <details class="dropdown dropdown-end">
+          <summary class="btn btn-success m-1" [class]="state === UIState.SENDING ? 'loading':''" >
+            Share
+          </summary>
+          <ul class="menu dropdown-content border p-0 overflow-hidden rounded-lg border-white bg-base-100 z-[1] w-72 shadow">
+            <li class="hover:bg-primary">
+
+              <button type="submit" (click)="uploadBundle(bundleForm)">
+                <div class="flex flex-col">
+                  <span class="flex flex-row gap-1 font-semibold">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
+                      <path d="M18 1.5c2.9 0 5.25 2.35 5.25 5.25v3.75a.75.75 0 0 1-1.5 0V6.75a3.75 3.75 0 1 0-7.5 0v3a3 3 0 0 1 3 3v6.75a3 3 0 0 1-3 3H3.75a3 3 0 0 1-3-3v-6.75a3 3 0 0 1 3-3h9v-3c0-2.9 2.35-5.25 5.25-5.25Z" />
+                    </svg>
+    
+                    Public bandoru
+                  </span>
+                  <div class="text-xs">
+                    For sharing bandorus to your heart's content
+                  </div>
+                </div>                        
+              </button>
+            </li>
+            <div class="tooltip tooltip-right tooltip-info" data-tip="Requires an account, for secrets 🤫">
+              <li class="hover:bg-primary">
+                <button type="submit" (click)="uploadPrivate(bundleForm)">
+                  <div class="flex flex-col">
+                    <span class="flex flex-row gap-1 font-semibold">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
+                        <path fill-rule="evenodd" d="M12 1.5a5.25 5.25 0 0 0-5.25 5.25v3a3 3 0 0 0-3 3v6.75a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3v-6.75a3 3 0 0 0-3-3v-3c0-2.9-2.35-5.25-5.25-5.25Zm3.75 8.25v-3a3.75 3.75 0 1 0-7.5 0v3h7.5Z" clip-rule="evenodd" />
+                      </svg>
+      
+                      Private bandoru
+                    </span>
+                    <div class="text-xs">
+                      Requires an account, used for saving secrets 🤫
+                    </div>
+                  </div>
+                </button>
+              </li>
+            </div>
+          </ul>
+        </details>
       </section>
     </section>
   </div>
 </form>
+<app-auth-modal (signedIn)="afterSignIn()"></app-auth-modal>

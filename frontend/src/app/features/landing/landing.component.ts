@@ -1,14 +1,16 @@
-import {Component, ViewChild} from '@angular/core';
+import {Component, inject, ViewChild} from '@angular/core';
 import {asFormControl, BundleFormType, SaveBundleFormService} from "../../shared/state/save-bundle-form/save-bundle-form.service";
 import {BundleEditorComponent} from "../../shared/ui/bundle-editor/bundle-editor.component";
 import {BundleMetadataEditorComponent} from "../../shared/ui/bundle-metadata-editor/bundle-metadata-editor.component";
 import {BundleRepository} from "../../shared/data-access/bundle-repository/bundle-repository.service";
-import {map, Observable, retry, switchMap, zip, zipAll} from "rxjs";
+import {map, Observable, retry, switchMap, take, zip, zipAll} from "rxjs";
 import {AbstractControl, FormArray, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {Router} from "@angular/router";
 import {ToastService} from "../../shared/state/toast/toast.service";
 import {JsonPipe} from "@angular/common";
 import {AuthModalComponent} from "../../shared/ui/auth-modal/auth-modal.component";
+import { AuthService, NO_USER } from '../../shared/data-access/auth-service/auth.service';
+import { User } from '../../shared/models/User';
 
 enum State {
   OK,
@@ -34,6 +36,9 @@ export class LandingComponent {
   state: State = State.OK;
 
   public UIState = State;
+  @ViewChild(AuthModalComponent) authModal!: AuthModalComponent;
+
+  authService = inject(AuthService);
 
   constructor(private readonly saveBundleFormService: SaveBundleFormService,
               private readonly bundleRepository: BundleRepository,
@@ -50,6 +55,23 @@ export class LandingComponent {
     this.saveBundleFormService.removeFile(id);
   }
 
+  uploadPrivate(bundleForm: BundleFormType) {
+    this.bundleForm.controls.private.setValue(true);
+    this.authService.getAuthUser().pipe(take(1)).subscribe({
+      next: (user) => {
+        if (user === NO_USER) {
+          this.authModal.openDialog('login');
+        } else {
+          this.uploadBundle(bundleForm);
+        }
+      }
+    })
+  }
+
+  afterSignIn() {
+    this.uploadBundle(this.bundleForm);
+  }
+
   uploadBundle(bundleForm: BundleFormType) {
     if (bundleForm.invalid) {
       bundleForm.markAsDirty();
@@ -60,6 +82,7 @@ export class LandingComponent {
     this.bundleRepository.postBundle({
       description: bundle.description ?? '',
       files: (bundle.files ?? []).map(file => ({ filename: file.fileName || '' })),
+      private: bundle.private!,
     }).pipe(switchMap((bundleResponse) => {
       const uploads = bundleResponse.post_urls.map((url, index) => {
         const blob = new Blob([bundle?.files?.[index]?.bundleText ?? '']);

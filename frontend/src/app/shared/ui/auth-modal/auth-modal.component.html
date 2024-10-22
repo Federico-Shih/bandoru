@@ -101,9 +101,6 @@
     <div class="modal-action">
 
       @if (authState() == 'login' || authState() == 'signup') {
-        <form>
-          <button class="btn btn-accent w-[90px]">Close</button>
-        </form>
         <button class="btn btn-primary w-[90px]" [disabled]="submitLoading()" (click)="submit()">
           @if (submitLoading()) {
             <span class="loading loading-spinner text-primary"></span>

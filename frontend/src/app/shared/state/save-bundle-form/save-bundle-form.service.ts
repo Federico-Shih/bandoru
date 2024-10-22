@@ -17,6 +17,7 @@ export class SaveBundleFormService {
       this.newBundle(),
     ]),
     description: new FormControl<string|null>(''),
+    private: new FormControl<boolean>(true),
   });
 
   constructor(private readonly bundleRepository: BundleRepository) { }
