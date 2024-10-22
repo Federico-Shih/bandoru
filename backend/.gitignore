@@ -1,4 +1,4 @@
-.idea/
+.idea/./*
 .bundle/
 .deps/
 bundle.zip
@@ -6,3 +6,4 @@ bundle.zip
 .venv/
 __pycache__/
 Pipfile
+venv/*
