@@ -43,3 +43,4 @@ Thumbs.db
 
 aws
 /aws/
+/terraform-output.json

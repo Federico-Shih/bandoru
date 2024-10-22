@@ -93,7 +93,7 @@ export class AuthService {
   }
 
   // Should only be used for authenticated sessions
-  public getUser(): Observable<User> {
+  public getUser(): Observable<User | "NO_USER"> {
     return this.loggedInUser.pipe(filter((user) => user !== NO_USER));
   }
 }
