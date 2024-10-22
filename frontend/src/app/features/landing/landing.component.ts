@@ -1,4 +1,4 @@
-import {Component, inject, ViewChild} from '@angular/core';
+import {Component, ElementRef, inject, ViewChild} from '@angular/core';
 import {asFormControl, BundleFormType, SaveBundleFormService} from "../../shared/state/save-bundle-form/save-bundle-form.service";
 import {BundleEditorComponent} from "../../shared/ui/bundle-editor/bundle-editor.component";
 import {BundleMetadataEditorComponent} from "../../shared/ui/bundle-metadata-editor/bundle-metadata-editor.component";
@@ -68,11 +68,21 @@ export class LandingComponent {
     })
   }
 
+  uploadPublic(bundleForm: BundleFormType) {
+    this.bundleForm.controls.private.setValue(false);
+    this.uploadBundle(bundleForm);
+  }
+
   afterSignIn() {
     this.uploadBundle(this.bundleForm);
   }
 
+  @ViewChild('shareDropdown') dropdown!: ElementRef<HTMLDetailsElement>;
+
   uploadBundle(bundleForm: BundleFormType) {
+    if (this.dropdown) {
+      this.dropdown.nativeElement.open = false;
+    }
     if (bundleForm.invalid) {
       bundleForm.markAsDirty();
       return;

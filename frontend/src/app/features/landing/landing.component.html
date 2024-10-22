@@ -1,4 +1,4 @@
-<form [formGroup]="bundleForm" novalidate class="mb-14">
+<form [formGroup]="bundleForm" novalidate class="pb-24">
   <div class="p-3 w-full grid grid-cols-12 gap-x-4 auto-rows-max gap-y-4 relative">
     <aside class="col-span-12 md:col-span-3">
       <div class="md:hidden collapse collapse-arrow border-gray-700 border flex-shrink-0">
@@ -26,14 +26,14 @@
       <section class="flex flex-row">
         <button class="btn btn-primary" type="button" (click)="addFile()">Add File</button>
         <div class="flex-1"></div>
-        <details class="dropdown dropdown-end">
+        <details #shareDropdown class="dropdown dropdown-end" tabindex="5">
           <summary class="btn btn-success m-1" [class]="state === UIState.SENDING ? 'loading':''" >
             Share
           </summary>
           <ul class="menu dropdown-content border p-0 overflow-hidden rounded-lg border-white bg-base-100 z-[1] w-72 shadow">
             <li class="hover:bg-primary">
 
-              <button type="submit" (click)="uploadBundle(bundleForm)">
+              <button type="submit" (click)="uploadPublic(bundleForm)">
                 <div class="flex flex-col">
                   <span class="flex flex-row gap-1 font-semibold">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
