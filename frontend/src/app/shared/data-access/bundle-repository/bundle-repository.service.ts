@@ -4,7 +4,7 @@ import {BundleFormDto} from "../../models/BundlePostDto";
 import {BundleGetResponse, BundleUploadResponse, PresignedUrlResponse} from "../../models/Bundle";
 
 import {environment} from "../../../../environments/environment";
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { WITHOUT_AUTH } from '../../interceptors/add-token.interceptor';
 
 const API_URL = environment.apiUrl;
@@ -24,8 +24,16 @@ export class BundleRepository {
     return this.httpClient.get<BundleGetResponse>(`${API_URL}/bandoru/${id}`);
   }
 
-  getBundles(id: string) {
-    return this.httpClient.get<BundleGetResponse[]>(`${API_URL}/bandoru/${id}`);
+  getBundles(userId: string): Observable<BundleGetResponse[]> {
+    return of([{
+      id: "hola",
+      description: "aaaaa",
+      files: [],
+      created_at: new Date(),
+      last_modified: new Date(),
+    }]);
+    // const search = new URLSearchParams({ user: userId });
+    // return this.httpClient.get<BundleGetResponse[]>(`${API_URL}/bandoru?` + search.toString());
   }
 
   uploadFile(url: PresignedUrlResponse, file: File) {

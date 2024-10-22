@@ -35,14 +35,13 @@ export class ViewBundleComponent {
         }
       }))
       .pipe(filter((value): value is string => value !== null))
-      .pipe(tap(console.log))
       .pipe(switchMap((id) => this.bundleRepository.getBundle(id)))
       .pipe(tap((bundle) => {
         this.loadingBundle.set(false);
         this.saveBundleFormService.loadBundle(bundle);
       })).pipe(
         switchMap(({ files }) => {
-          return merge(...files.map((file, index) => this.bundleRepository.downloadFile(file.url).pipe(map((fileContent) => ({ fileContent, ...file, index })))))
+          return merge(...files.map((file, index) => this.bundleRepository.downloadFile(file.url ?? '').pipe(map((fileContent) => ({ fileContent, ...file, index })))))
         })
       )
       .subscribe({
