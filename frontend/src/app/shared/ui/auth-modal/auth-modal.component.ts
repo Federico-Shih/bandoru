@@ -1,4 +1,4 @@
-import {Component, computed, effect, ElementRef, inject, Input, signal, ViewChild} from '@angular/core';
+import {Component, computed, effect, ElementRef, EventEmitter, inject, Input, Output, signal, ViewChild} from '@angular/core';
 import {
   AbstractControl,
   FormControl,
@@ -11,6 +11,7 @@ import {
 import {JsonPipe} from "@angular/common";
 import { signUp, signIn, fetchAuthSession, confirmSignIn, confirmSignUp } from "aws-amplify/auth"
 import {AuthService} from "../../data-access/auth-service/auth.service";
+import { User } from '../../models/User';
 
 function passwordFormatValidator(): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
@@ -43,6 +44,10 @@ function passwordFormatValidator(): ValidatorFn {
 })
 export class AuthModalComponent {
   authService = inject(AuthService);
+
+  @Output()
+  signedIn = new EventEmitter<User>();
+
   @ViewChild('dialogRef') dialogRef!: ElementRef<HTMLDialogElement>;
 
   submitLoading = signal(false);
@@ -110,8 +115,11 @@ export class AuthModalComponent {
           this.codeFormControl.controls.password.setValue(this.formGroup.value.password!);          return;
         }
         this.authService.pullUser().subscribe({
-          next: () => {
+          next: (user) => {
             this.closeDialog();
+            if (user !== null) {
+              this.signedIn.emit({ email: user.signInDetails?.loginId!, id: user.userId});
+            }
           }
         });
       } catch (err) {
@@ -162,9 +170,13 @@ export class AuthModalComponent {
             username: this.codeFormControl.value.email!,
             password: this.codeFormControl.value.password!
           });
+          // Sign in completed
           this.authService.pullUser().subscribe({
-            next: () => {
+            next: (user) => {
               this.closeDialog();
+              if (user !== null) {
+                this.signedIn.emit({ email: user.signInDetails?.loginId!, id: user.userId});
+              }
             }
           });
         } catch (err) {

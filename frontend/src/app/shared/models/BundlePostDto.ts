@@ -6,4 +6,5 @@ export type BundleFormDto = {
   files: FileDto[];
   description?: string;
   parent_id?: string;
+  private: boolean;
 }
