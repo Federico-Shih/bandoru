@@ -45,7 +45,8 @@ def create(form: CreateBandoruForm, logged_username: Optional[str] = None) -> di
 
 def get(bandoru_id: str, logged_username: Optional[str] = None) -> Optional[Bandoru]:
     pk = f"BANDORU#{bandoru_id}"
-    item = database.db_table.get_item(Key={'PK':pk,'SK':pk})["Item"]
+    res = database.db_table.get_item(Key={'PK':pk,'SK':pk})
+    item = res["Item"] if "Item" in res else None
 
     bandoru: Optional[Bandoru] = None
     if item is not None:
@@ -57,5 +58,6 @@ def get(bandoru_id: str, logged_username: Optional[str] = None) -> Optional[Band
 def get_by_user(user_id: str) -> list[Bandoru]:
     pk = f'USER#{user_id}'
 
-    items = database.db_table.query(IndexName=database.user_idx, KeyConditionExpression=Key('GSI1PK').eq(pk))["Items"]
+    res = database.db_table.query(IndexName=database.user_idx, KeyConditionExpression=Key('GSI1PK').eq(pk))
+    items = res["Items"] if "Items" in res else []
     return [Bandoru(**item) for item in items]
