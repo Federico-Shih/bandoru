@@ -6,7 +6,7 @@ from pydantic import BaseModel, conbytes, conlist, constr, UUID4, ConfigDict
 class FileForm(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    filename: constr(max_length=127, pattern=r'^.*[.].+$')
+    filename: constr(max_length=127)
 
 class CreateBandoruForm(BaseModel):
     model_config = ConfigDict(extra="forbid")
