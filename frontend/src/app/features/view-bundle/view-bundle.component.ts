@@ -53,9 +53,7 @@ export class ViewBundleComponent {
         error: (err) => {
           this.loadingBundle.set(false);
           if (err instanceof HttpErrorResponse) {
-            if (err.status === 404) {
-              this.router.navigate(['/404']);
-            }
+            this.router.navigate(['/404']);
           }
         },
       });
