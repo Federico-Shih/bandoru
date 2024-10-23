@@ -46,10 +46,10 @@ export class SaveBundleFormService {
   }
 
 
-  public loadBundle({ files, description }: BundleGetResponse) {
+  public loadBundle({ files, description, private: privateStatus }: BundleGetResponse) {
     this.bundleForm.controls.files.clear();
     this.bundleForm.controls.description.setValue(description ?? '');
-
+    this.bundleForm.controls.private.setValue(privateStatus);
     files.forEach((file) => {
       this.bundleForm.controls.files.push(this.withBundle({
         fileName: file.filename,
@@ -57,7 +57,7 @@ export class SaveBundleFormService {
         loading: true,
         url: file.url,
       }));
-    })
+    });
   }
 
   public removeFile(id: number) {
