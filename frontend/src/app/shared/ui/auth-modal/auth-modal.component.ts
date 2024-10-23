@@ -58,12 +58,13 @@ export class AuthModalComponent {
   });
 
   codeFormControl = new FormGroup({
-    code: new FormControl('', [Validators.required]),
+    code: new FormControl('', [Validators.required],),
     email: new FormControl(''),
     password: new FormControl(''),
   });
 
   authState = signal<'login' | 'signup' | 'confirm'>('login');
+  isSubmitted = signal(false);
 
   authStateLabel = computed(() => {
     const authState = this.authState();
@@ -96,10 +97,13 @@ export class AuthModalComponent {
   }
 
   async submit() {
+    this.isSubmitted.set(true);
     if (!this.formGroup.valid) {
       this.formGroup.markAllAsTouched();
+      this.formGroup.markAsDirty();
       return;
     }
+    this.isSubmitted.set(false);
     this.submitLoading.set(true);
     if (this.authState() === 'login') {
       // Call login API
@@ -156,7 +160,9 @@ export class AuthModalComponent {
   }
 
   async submitCode() {
+    this.isSubmitted.set(true);
     if (this.codeFormControl.invalid) return;
+    this.isSubmitted.set(false);
     try {
       this.submitLoading.set(true);
       const { isSignUpComplete } = await confirmSignUp({

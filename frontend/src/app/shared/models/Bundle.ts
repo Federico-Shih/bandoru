@@ -15,6 +15,7 @@ export type BundleGetResponse = {
   files: BundleFileGetResponse[];
   created_at: Date;
   last_modified: Date;
+  private: boolean;
 }
 
 export type BundleFileGetResponse = {
