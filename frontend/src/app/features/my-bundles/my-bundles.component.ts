@@ -30,6 +30,7 @@ export class MyBundlesComponent implements OnInit {
   loadingBundle = signal(true);
   hasBundle = signal(false);
   form = this.bundleService.linkForm(); 
+  currentUrl = '';
 
 
   ngOnInit(): void {
@@ -46,6 +47,7 @@ export class MyBundlesComponent implements OnInit {
     ).subscribe({
       next: (bundles) => {
         this.bundles = bundles;
+        this.loading = false;
         if (bundles.length > 0) {
           this.bundleRepository.getBundle(bundles[0].id).subscribe({
             next: (bundle) => {
@@ -58,7 +60,6 @@ export class MyBundlesComponent implements OnInit {
             }
           })
         }
-        this.loading = false;
       },
       error: (error) => {
         console.error(error);
@@ -72,7 +73,7 @@ export class MyBundlesComponent implements OnInit {
 
   loadBundle(bundle:BundleGetResponse){
     const textDecoder = new TextDecoder();
-
+    this.currentUrl = window.location.origin + `/share/${bundle.id}`;
     this.loadingFiles.set(true);
     this.bundleService.loadBundle(bundle);
     this.bundleRepository.getBundle(bundle.id).pipe(
@@ -84,7 +85,9 @@ export class MyBundlesComponent implements OnInit {
         const fileControl = this.form.controls.files.at(index).controls;
         fileControl.loading.setValue(false);
         fileControl.bundleText.setValue(textDecoder.decode(fileContent));
+        
         this.loadingFiles.set(false);
+        this.hasBundle.set(true);
       },
       error: (err) => {
         this.loadingBundle.set(false);
