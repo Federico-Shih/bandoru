@@ -26,6 +26,7 @@ class BandoruDTO(BaseModel):
     id: str
     parent_id: Optional[UUID4] = None
     description: Optional[str] = None
+    private: bool
     files: list[FileDTO]
     created_at: datetime
     last_modified: datetime
