@@ -150,7 +150,6 @@ resource "aws_apigatewayv2_integration" "spa-proxy-integration" {
 }
 
 resource "aws_apigatewayv2_route" "proxy_route" {
-  depends_on = [aws_apigatewayv2_integration.spa-proxy-integration]
   api_id    = aws_apigatewayv2_api.spa-proxy.id
   route_key = "GET /{proxy+}"
   target = "integrations/${aws_apigatewayv2_integration.spa-proxy-integration.id}"
