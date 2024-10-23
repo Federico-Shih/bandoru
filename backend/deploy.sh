@@ -2,10 +2,9 @@
 
 PYTHON_VERSION="3.12"
 
-rm -Rf bundle.zip .bundle .deps &> /dev/null
+rm -Rf build .bundle .deps &> /dev/null
 
-mkdir -p .bundle .deps .pip_cache &> /dev/null
-
+mkdir -p .bundle .deps .pip_cache build &> /dev/null
 
 echo -e "\nInstalling requirements..."
 pip install \
@@ -27,15 +26,10 @@ for filepath in ./src/*.py; do
   cp "$filepath" .bundle/lambda_function.py
 
   cd .bundle
-  zip -q -x "*/__pycache__/*" -r ../bundle.zip .
+  zip -q -x "*/__pycache__/*" -r /build/$function_name.zip .
   cd ..
 
-  aws lambda update-function-code \
-    --no-cli-pager \
-    --function-name "$function_name" \
-    --zip-file fileb://./bundle.zip
-
-  rm -f ./bundle.zip ./bundle/lambda_function.py
+  rm -f ./bundle/lambda_function.py
 done
 
 

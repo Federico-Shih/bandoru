@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 #Deploy architecture
 cd terraform
 terraform init
@@ -8,15 +10,35 @@ terraform output -json > ../frontend/terraform-output.json
 
 #Deploy frontend
 cd ../frontend
+
+S3_NAME=$(jq -r '.spa_s3_bucket.value' "terraform-output.json")
 website_url=$(jq -r '.spa_s3_proxy.value' "terraform-output.json")
-pnpm install
-#npm install
-./env.sh
-./deploy.sh
+
+docker build -t bandoru-frontend .
+
+cd ..
+
+mkdir -p ./frontend_build
+
+docker run --rm -v $(pwd)/frontend_build:/frontend/dist/frontend/browser bandoru-frontend
+
+aws s3 sync ./frontend_build s3://$S3_NAME --delete
 
 #Deploy backend
-cd ../backend
-./deploy.sh
+
+docker build -t bandoru-backend ./backend
+
+docker run --rm -v $(pwd)/backend_build:/build bandoru-backend
+
+for filepath in ./backend_build/*.zip; do
+  filename="${filepath##*/}"
+  function_name=${filename%.zip}
+
+  aws lambda update-function-code \
+    --no-cli-pager \
+    --function-name "$function_name" \
+    --zip-file fileb://$filepath
+done
 
 echo 'Deployment complete! :)'
 echo "Website URL: $website_url"

@@ -1,0 +1,8 @@
+bandoru-bucket-name = "bandoru-bucket"
+bandoru-spa-bucket-name = "bandoru-spa"
+google_idp_client_id = "528592362426-vjck41hk2293rpp4v3ige602gd46pm4p.apps.googleusercontent.com"
+google_idp_client_secret = "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"
+cognito-domain = "bandoru"
+dynamodb-table-name          = "bandoru"
+dynamodb-user-idx            = "bandoru-by-user"
+aws-profile                  = "default"
