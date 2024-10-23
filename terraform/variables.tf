@@ -18,16 +18,8 @@ variable "cognito-domain" {
   type = string
 }
 
-variable "allowed_localhost_url" {
-  type = string
-}
-
 variable "aws-profile" {
   type = string
-}
-
-variable "allowed-cognito-callback-url" {
-  type = list(string)
 }
 
 variable "dynamodb-table-name" {

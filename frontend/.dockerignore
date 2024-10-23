@@ -1,0 +1,7 @@
+Dockerfile
+.vscode
+.angular
+.gitignore
+*.md
+node_modules
+dist
