@@ -2,8 +2,8 @@
 <div class="w-full flex flex-row items-center justify-center overflow-x-scroll gap-6 pt-5 pr-5">
   @if (bundles && user != "NO_USER"){
     @for (bundle of bundles; track bundle.id){
-      <a (click)="loadBundle(bundle)">
-        <div class="card  bg-base-300  w-48  shadow-xl" >
+      <button (click)="loadBundle(bundle)">
+        <div class="card  bg-base-300  w-48  shadow-xl hover:scale-105" >
           <div class="card-body p-4 overflow-hidden">
             <div class="flex flex-row items-center gap-3">
               @if (bundle.private) {              
@@ -32,7 +32,7 @@
             </div>
           </div>
         </div>
-      </a>
+      </button>
     }
   } @else {
     @if (loading) {
@@ -49,7 +49,7 @@
         <input type="checkbox" />
         <div class="collapse-title shadow-lg">Bundle details</div>
         <div class="collapse-content">
-            <!-- Description: {{ this.form.controls.description.value }} -->
+            Description: {{ this.form.controls.description.value }}
         </div>
       </div>
       <div class="max-sm:hidden flex flex-col card shadow-sm  border border-gray-700">
@@ -57,11 +57,11 @@
             <h2 class="card-title text-lg">Description:</h2>
             <div class="divider divider-vertical my-0 py-0"></div>
             <p>
-                <!-- {{ this.form.controls.description.value }} -->
+                {{ this.form.controls.description.value }}
             </p>
         </div>
       </div>
-      <!-- <app-copy-link [url]="currentUrl"></app-copy-link> -->
+      <app-copy-link [url]="currentUrl"></app-copy-link>
     </aside>
     <section class="col-span-12 md:col-span-9 lg:col-span-8 xl:col-span-6 flex flex-col gap-3 items-stretch">
       @if (loadingFiles()) {
@@ -69,11 +69,11 @@
           <span class="loading loading-bars loading-lg"></span>
         </div>
       } @else {
-        <!-- @for (file of form.controls.files.controls; track file.value.id) {
+        @for (file of form.controls.files.controls; track file.value.id) {
           <app-bundle-editor [customControl]="file" [readOnly]="true">
   
           </app-bundle-editor>
-        } -->
+        }
       }
       <div class="h-[200px] ">
       
