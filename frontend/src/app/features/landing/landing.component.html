@@ -27,8 +27,12 @@
         <button class="btn btn-primary" type="button" (click)="addFile()">Add File</button>
         <div class="flex-1"></div>
         <details #shareDropdown class="dropdown dropdown-end" tabindex="5">
-          <summary class="btn btn-success m-1" [class]="state === UIState.SENDING ? 'loading':''" >
-            Share
+          <summary class="btn btn-success m-1 w-24" >
+            @if (state === UIState.SENDING) {
+              <span class="loading loading-spinner loading-xs"></span>
+            } @else {
+              Share
+            }
           </summary>
           <ul class="menu dropdown-content border p-0 overflow-hidden rounded-lg border-white bg-base-100 z-[1] w-72 shadow">
             <li class="hover:bg-primary">
