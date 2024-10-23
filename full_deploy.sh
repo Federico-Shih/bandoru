@@ -35,6 +35,8 @@ echo -e "\Done Deploying Frontend"
 
 docker build -t bandoru-backend ./backend
 
+mkdir -p ./backend_build
+
 docker run --rm -v $(pwd)/backend_build:/build bandoru-backend
 
 echo -e "\Deploying Backend"
