@@ -43,7 +43,7 @@
   }
 </div>
 <div class="divider my-0.5"></div>
-@if (!loadingBundle() && hasBundle()) {
+@if (!loadingBundle() && hasBundle() && bundles) {
   <div class="p-3 w-full grid grid-cols-12 gap-x-4 auto-rows-max gap-y-4 h-screen overflow-y-scroll">
     <aside class="col-span-12 md:col-span-3 flex flex-col gap-3">
       <div class="md:hidden collapse collapse-arrow border-gray-700 border">
@@ -117,7 +117,7 @@
       </div>
     </section>
   </div>
-} @else if(loadingBundle()) {
+} @else if(loadingBundle() && bundles) {
   <div class="w-full h-full flex justify-center items-center">
     <progress class="progress w-1/2"></progress>  
   </div>
