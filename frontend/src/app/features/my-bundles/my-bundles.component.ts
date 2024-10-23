@@ -76,6 +76,7 @@ export class MyBundlesComponent implements OnInit {
     this.currentUrl = window.location.origin + `/share/${bundle.id}`;
     this.loadingFiles.set(true);
     this.bundleService.loadBundle(bundle);
+    this.hasBundle.set(true);
     this.bundleRepository.getBundle(bundle.id).pipe(
       switchMap(({ files }) => {
         return merge(...files.map((file, index) => this.bundleRepository.downloadFile(file.url ?? '').pipe(map((fileContent) => ({ fileContent, ...file, index })))))
@@ -87,7 +88,6 @@ export class MyBundlesComponent implements OnInit {
         fileControl.bundleText.setValue(textDecoder.decode(fileContent));
         
         this.loadingFiles.set(false);
-        this.hasBundle.set(true);
       },
       error: (err) => {
         this.loadingBundle.set(false);
