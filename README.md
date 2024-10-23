@@ -17,7 +17,7 @@
 1. Configurar credenciales de aws para que terraform se conecta a nuestra cuenta de aws.
 2. Asegurarse que el docker daemon se está ejecutando
 3. Ejecutar el script de deploy `./full_deploy.sh`
-4. Esperar a que se ejecute el terraform y el deploy del frontend y el backend.
+4. Esperar a que se ejecute el terraform y el deploy del frontend y el backend. Al final de todo, imprimirá la URL del sitio web.
 5. Al finalizar, se crean los directorios `frontend_build` y `backend_build`. Si desea eliminarlos, ejecutar `sudo rm -rf frontend_build/ backend_build/`
 
 Las variables de terraform están en `/frontend/terraform.tfvars`. Ahí se puede establecer cuál es el profile de aws a usar. Por defecto usa el 'default'.
