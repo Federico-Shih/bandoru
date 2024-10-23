@@ -25,15 +25,15 @@ export class BundleRepository {
   }
 
   getBundles(userId: string): Observable<BundleGetResponse[]> {
-    return of([{
-      id: "hola",
-      description: "aaaaa",
-      files: [],
-      created_at: new Date(),
-      last_modified: new Date(),
-    }]);
-    // const search = new URLSearchParams({ user: userId });
-    // return this.httpClient.get<BundleGetResponse[]>(`${API_URL}/bandoru?` + search.toString());
+    // return of([{
+    //   id: "hola",
+    //   description: "aaaaa",
+    //   files: [],
+    //   created_at: new Date(),
+    //   last_modified: new Date(),
+    // }]);
+    const search = new URLSearchParams({ user: userId });
+    return this.httpClient.get<BundleGetResponse[]>(`${API_URL}/bandoru?` + search.toString());
   }
 
   uploadFile(url: PresignedUrlResponse, file: File) {

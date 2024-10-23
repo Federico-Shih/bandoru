@@ -1,1 +1,23 @@
-<p>my-bundles works!</p>
+<!--We list the bundles(description,file,names,etc) that redirect to share/id-->
+<div class="w-full flex flex-col items-center justify-between gap-6">
+  <h1 class="text-3xl">My Bundles</h1>
+  @if (bundles && user != "NO_USER"){
+    @for (bundle of bundles; track bundle.id){
+      <a routerLink="/share/{{bundle.id}}">
+        <div class="card bg-base-300 w-96 shadow-xl" >
+          <div class="card-body">
+            <p>Description: {{bundle.description}}</p>
+            <p>Files: {{bundle.files.length}}</p>
+            <p>Created at: {{bundle.created_at}}</p>
+          </div>
+        </div>
+      </a>
+    }
+  }@else {
+    @if (loading) {
+      <p>Loading bundles...</p>
+    }@else {
+      <p>No bundles available.</p>
+    }
+  }
+</div>
