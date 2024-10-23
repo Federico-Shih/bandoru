@@ -22,6 +22,11 @@ export const routes: Routes = [
     canActivate: [logoutGuard],
   },
   {
+    path: 'my-bandorus',
+    loadComponent: () => import('./features/my-bundles/my-bundles.component').then(m => m.MyBundlesComponent)
+  },
+
+  {
     path: '**',
     loadComponent: () => import('./features/not-found/not-found.component').then(m => m.NotFoundComponent)
   },
