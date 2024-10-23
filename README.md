@@ -10,15 +10,23 @@
 ### Prerequisitos
 - terraform v1.9+
 - aws-cli
-- jq (commandline JSON processor)
 - docker
 
 ### Pasos
 1. Configurar credenciales de aws para que terraform se conecta a nuestra cuenta de aws.
-2. Asegurarse que el docker daemon se está ejecutando
-3. Ejecutar el script de deploy `./full_deploy.sh`
-4. Esperar a que se ejecute el terraform y el deploy del frontend y el backend. Al final de todo, imprimirá la URL del sitio web.
-5. Al finalizar, se crean los directorios `frontend_build` y `backend_build`. Si desea eliminarlos, ejecutar `sudo rm -rf frontend_build/ backend_build/`
+2. Asegurarse que el docker daemon se está ejecutando (`sudo systemctl start docker`)
+3. Asegurarse que el usuario se encuentra en el grupo `docker`:
+```shell
+sudo groupadd docker
+sudo usermod -aG docker $USER
+newgrp docker
+# Verificar que se puede ejecutar docker sin sudo:
+docker run hello-world
+# Si no se puede aún, reiniciar la pc para aplicar los cambios
+```
+4. Ejecutar el script de deploy `./full_deploy.sh`
+5. Esperar a que se ejecute el terraform y el deploy del frontend y el backend. Al final de todo, imprimirá la URL del sitio web.
+6. Al finalizar, se crean los directorios `frontend_build`, `urls` y `backend_build`. Si desea eliminarlos, ejecutar `sudo rm -rf frontend_build/ backend_build/ urls/`
 
 Las variables de terraform están en `/frontend/terraform.tfvars`. Ahí se puede establecer cuál es el profile de aws a usar. Por defecto usa el 'default'.
 

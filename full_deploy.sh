@@ -14,16 +14,17 @@ echo -e "\nDone Deploying Architecture"
 
 cd ../frontend
 
-S3_NAME=$(jq -r '.spa_s3_bucket.value' "terraform-output.json")
-website_url=$(jq -r '.spa_s3_proxy.value' "terraform-output.json")
-
 docker build -t bandoru-frontend .
 
 cd ..
 
 mkdir -p ./frontend_build
+mkdir -p ./urls
 
-docker run --rm -v $(pwd)/frontend_build:/frontend/dist/frontend/browser bandoru-frontend
+docker run --rm -v $(pwd)/frontend_build:/frontend/dist/frontend/browser -v $(pwd)/urls/:/urls bandoru-frontend
+
+S3_NAME=$(cat ./urls/s3.txt)
+website_url=$(cat ./urls/website.txt)
 
 echo -e "\Deploying Frontend"
 
