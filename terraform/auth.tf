@@ -12,7 +12,7 @@ resource "aws_cognito_user_pool" "pool" {
   password_policy {
     minimum_length    = 8
     require_lowercase = true
-    require_uppercase = false
+    require_uppercase = true
     require_numbers   = false
     require_symbols   = false
   }
@@ -33,23 +33,6 @@ resource "aws_cognito_user_pool" "pool" {
   }
 }
 
-resource "aws_cognito_identity_provider" "google_provider" {
-  user_pool_id  = aws_cognito_user_pool.pool.id
-  provider_name = "Google"
-  provider_type = "Google"
-
-  provider_details = {
-    authorize_scopes = "openid email"
-    client_id        = var.google_idp_client_id
-    client_secret    = var.google_idp_client_secret
-  }
-
-  attribute_mapping = {
-    email    = "email"
-    username = "sub"
-  }
-}
-
 resource "aws_cognito_user_pool_domain" "main" {
   domain       = var.cognito-domain
   user_pool_id = aws_cognito_user_pool.pool.id
@@ -64,7 +47,7 @@ resource "aws_cognito_user_pool_client" "default-client" {
   allowed_oauth_flows                  = ["code", "implicit"]
   allowed_oauth_scopes                 = ["email", "openid"]
   explicit_auth_flows                  = ["ALLOW_REFRESH_TOKEN_AUTH", "ALLOW_USER_SRP_AUTH", "ALLOW_USER_PASSWORD_AUTH", "ALLOW_CUSTOM_AUTH"]
-  supported_identity_providers         = ["COGNITO", aws_cognito_identity_provider.google_provider.provider_name]
+  supported_identity_providers         = ["COGNITO"]
   generate_secret                      = false
   prevent_user_existence_errors        = "ENABLED"
 }

@@ -6,14 +6,6 @@ variable "bandoru-spa-bucket-name" {
   type = string
 }
 
-variable "google_idp_client_id" {
-  type = string
-}
-
-variable "google_idp_client_secret" {
-  type = string
-}
-
 variable "cognito-domain" {
   type = string
 }
