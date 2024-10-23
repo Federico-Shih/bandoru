@@ -10,7 +10,6 @@ terraform output -json > ../frontend/terraform-output.json
 cd ../frontend
 website_url=$(jq -r '.spa_s3_proxy.value' "terraform-output.json")
 pnpm install
-#npm install
 ./env.sh
 ./deploy.sh
 
