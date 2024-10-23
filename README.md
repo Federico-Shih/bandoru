@@ -8,12 +8,10 @@
 ![Diagrama Arquitectura](./diagrama_arquitectura_cloud.png)
 ## How to deploy
 ### Prerequisitos
-- terraform v1.9+
-- aws-cli
 - docker
 
 ### Pasos
-1. Configurar credenciales de aws para que terraform se conecta a nuestra cuenta de aws.
+1. Colocar las credenciales de aws en `~/.aws/credentials`. Se usara el perfil `default`.
 2. Asegurarse que el docker daemon se está ejecutando (`sudo systemctl start docker`)
 3. Asegurarse que el usuario se encuentra en el grupo `docker`:
 ```shell
@@ -24,9 +22,8 @@ newgrp docker
 docker run hello-world
 # Si no se puede aún, reiniciar la pc para aplicar los cambios
 ```
-4. Ejecutar el script de deploy `./full_deploy.sh`
+4. Ejecutar el script de deploy `./docker-deploy.sh` -> Puede tardar varios minutos. :)
 5. Esperar a que se ejecute el terraform y el deploy del frontend y el backend. Al final de todo, imprimirá la URL del sitio web.
-6. Al finalizar, se crean los directorios `frontend_build`, `urls` y `backend_build`. Si desea eliminarlos, ejecutar `sudo rm -rf frontend_build/ backend_build/ urls/`
 
 Las variables de terraform están en `/frontend/terraform.tfvars`. Ahí se puede establecer cuál es el profile de aws a usar. Por defecto usa el 'default'.
 

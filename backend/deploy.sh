@@ -2,9 +2,10 @@
 
 PYTHON_VERSION="3.12"
 
-rm -Rf build .bundle .deps &> /dev/null
+rm -Rf bundle.zip .bundle .deps &> /dev/null
 
-mkdir -p .bundle .deps .pip_cache build &> /dev/null
+mkdir -p .bundle .deps .pip_cache &> /dev/null
+
 
 echo -e "\nInstalling requirements..."
 pip install \
@@ -17,7 +18,7 @@ pip install \
     --cache-dir .pip_cache \
 
 
-echo -e "\Building..."
+echo -e "\nDeploying..."
 cp -R src/shared .deps/* .bundle/
 for filepath in ./src/*.py; do
   filename="${filepath##*/}"
@@ -26,14 +27,19 @@ for filepath in ./src/*.py; do
   cp "$filepath" .bundle/lambda_function.py
 
   cd .bundle
-  zip -q -x "*/__pycache__/*" -r /build/$function_name.zip .
+  zip -q -x "*/__pycache__/*" -r ../bundle.zip .
   cd ..
 
-  rm -f ./bundle/lambda_function.py
+  aws lambda update-function-code \
+    --no-cli-pager \
+    --function-name "$function_name" \
+    --zip-file fileb://./bundle.zip
+
+  rm -f ./bundle.zip ./bundle/lambda_function.py
 done
 
 
 echo -e "\nCleaning up..."
 rm -Rf bundle.zip .bundle
 
-echo -e "\nDone Building Backend"
+echo -e "\nDone"
