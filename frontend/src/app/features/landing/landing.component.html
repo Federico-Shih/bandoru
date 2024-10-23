@@ -1,9 +1,9 @@
-<form [formGroup]="bundleForm" novalidate class="pb-24">
+<form [formGroup]="bundleForm" novalidate class="pb-24 flex-1 h-screen overflow-y-scroll">
   <div class="p-3 w-full grid grid-cols-12 gap-x-4 auto-rows-max gap-y-4 relative">
     <aside class="col-span-12 md:col-span-3">
       <div class="md:hidden collapse collapse-arrow border-gray-700 border flex-shrink-0">
         <input type="checkbox" />
-        <div class="collapse-title shadow-lg">Bundle details</div>
+        <div class="collapse-title">Bundle details</div>
         <div class="collapse-content">
           <app-bundle-metadata-editor
             [descriptionFormControl]="bundleForm.controls.description"
@@ -70,6 +70,9 @@
         </details>
       </section>
     </section>
+  </div>
+  <div class="h-[200px]">
+
   </div>
 </form>
 <app-auth-modal (signedIn)="afterSignIn()"></app-auth-modal>

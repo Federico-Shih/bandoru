@@ -7,7 +7,7 @@
     <div class="flex flex-col gap-5 mt-3">
       @if (authState() == 'signup' || authState() == 'login') {
         <div>
-          <label class="input input-bordered flex items-center gap-2" [class.input-error]="formGroup.controls.email.errors && !formGroup.controls.email.untouched">
+          <label class="input input-bordered flex items-center gap-2" [class.input-error]="formGroup.controls.email.errors && isSubmitted()">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 16 16"
@@ -20,7 +20,7 @@
             </svg>
             <input [formControl]="formGroup.controls.email" type="text" class="grow" placeholder="Email" />
           </label>
-          @if (formGroup.controls.email.errors && !formGroup.controls.email.untouched) {
+          @if (formGroup.controls.email.errors && isSubmitted()) {
             @if (formGroup.controls.email.errors['required']) {
               <p class="text-sm text-error">Email is required</p>
             } @else {
@@ -40,7 +40,7 @@
           <!--        <input type="text" class="grow" placeholder="Username" />-->
           <!--      </label>-->
         <div>
-          <label class="input input-bordered flex items-center gap-2" [class.input-error]="formGroup.controls.password.errors && !formGroup.controls.password.untouched">
+          <label class="input input-bordered flex items-center gap-2" [class.input-error]="formGroup.controls.password.errors && isSubmitted()">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 16 16"
@@ -53,7 +53,7 @@
             </svg>
             <input [formControl]="formGroup.controls.password" type="password" class="grow" value="password" placeholder="Password" />
           </label>
-          @if (formGroup.controls.password.errors && !formGroup.controls.password.untouched) {
+          @if (formGroup.controls.password.errors && isSubmitted()) {
             @if (formGroup.controls.password.errors['required']) {
               <p class="text-sm text-error">Password is required</p>
             } @else if (formGroup.controls.password.errors['minlength']) {
@@ -62,9 +62,9 @@
               <p class="text-sm text-error">Password must contain at least one uppercase letter and one lowercase letter</p>
             }
           }
-          @if (formGroup.errors && formGroup.errors['loginFailed']) {
+          @if (formGroup.errors && formGroup.errors['loginFailed'] && isSubmitted()) {
             <p class="text-sm text-error">Invalid email or password</p>
-          } @else if (formGroup.errors && formGroup.errors['signUpFailed']) {
+          } @else if (formGroup.errors && formGroup.errors['signUpFailed'] && isSubmitted()) {
             <p class="text-sm text-error">{{formGroup.errors['signUpFailed']}}</p>
           }
           <button class="mt-2 btn-link text-white" (click)="authState.set(authState() == 'login' ? 'signup' : 'login')">
@@ -90,7 +90,7 @@
             </svg>
             <input [formControl]="codeFormControl.controls.code" type="text" class="grow" placeholder="Authorization code" />
           </label>
-          @if (codeFormControl.errors && codeFormControl.errors['codeFailed']) {
+          @if (codeFormControl.errors && codeFormControl.errors['codeFailed'] && isSubmitted()) {
             <p class="text-sm text-error">Invalid code, check your inbox again</p>
           } @else {
             <span class="text-white text-sm">Check your inbox for the authentication code!</span>
