@@ -17,7 +17,7 @@ pip install \
     --cache-dir .pip_cache \
 
 
-echo -e "\nDeploying..."
+echo -e "\Building..."
 cp -R src/shared .deps/* .bundle/
 for filepath in ./src/*.py; do
   filename="${filepath##*/}"
@@ -36,4 +36,4 @@ done
 echo -e "\nCleaning up..."
 rm -Rf bundle.zip .bundle
 
-echo -e "\nDone"
+echo -e "\nDone Building Backend"
