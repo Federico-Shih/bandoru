@@ -1,12 +1,13 @@
-from typing import Optional
+from typing import Optional, List
 
-from pydantic import BaseModel, conbytes, conlist, constr, UUID4, ConfigDict
+from pydantic import BaseModel, conbytes, conlist, constr, UUID4, ConfigDict, RootModel
 
 
 class FileForm(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     filename: constr(max_length=127)
+
 
 class CreateBandoruForm(BaseModel):
     model_config = ConfigDict(extra="forbid")
@@ -16,6 +17,11 @@ class CreateBandoruForm(BaseModel):
     parent_id: Optional[UUID4] = None
     private: Optional[bool] = False
 
+
 class PatchBandoruForm(BaseModel):
     model_config = ConfigDict(extra="forbid")
+
+
+class SetBandoruWebhooksForm(RootModel[List[str]]):
+    root: conlist(constr(max_length=255, pattern=r"^http(s)?://"), max_length=5)
 
