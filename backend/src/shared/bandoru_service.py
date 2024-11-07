@@ -7,8 +7,8 @@ from aws_lambda_powertools.event_handler.exceptions import *
 from boto3.dynamodb.conditions import Key
 
 from shared import database
-from shared.bandoru_s3_bucket import create_file_post_url
-from shared.forms import CreateBandoruForm
+from shared.bandoru_s3_bucket import create_file_post_url, delete_files
+from shared.forms import CreateBandoruForm, SetBandoruWebhooksForm
 from shared.models import File, Bandoru
 from shared.utils import uuid4_to_base64
 
@@ -42,6 +42,45 @@ def create(form: CreateBandoruForm, logged_username: Optional[str] = None) -> di
 
     return {"bandoru_id": bandoru["id"], "post_urls": urls}
 
+def replace(bandoru_id: str, form: CreateBandoruForm, logged_username: Optional[str] = None) -> dict:
+    if logged_username is None:
+        raise ServiceError(403, "Forbidden")
+
+    cur_bandoru = get(bandoru_id, logged_username)
+    if cur_bandoru is None:
+        raise NotFoundError
+    if cur_bandoru.owner_id != logged_username:
+        raise ServiceError(403, "Forbidden")
+
+    files = [
+        File(**file.model_dump(), id=uuid4_to_base64(uuid4())) for file in form.files
+    ]
+    timestamp = int(round(datetime.now().timestamp()))
+    bandoru = form.model_dump()
+    bandoru["id"] = bandoru_id
+    bandoru["PK"] = bandoru["SK"] = f"BANDORU#{bandoru['id']}"
+    bandoru["files"] = [file.model_dump() for file in files]
+    bandoru["created_at"] = cur_bandoru.created_at
+    bandoru["last_modified"] = timestamp
+
+    bandoru["owner_id"] = logged_username
+    bandoru["GSI1PK"] = f"USER#{logged_username}"
+    bandoru["GSI1SK"] = bandoru["PK"]
+
+    urls: list[dict] = []
+
+    database.db_table.put_item(Item=bandoru)
+
+    # Presigned URLs for each file
+    for file in files:
+        file_id = file.id
+        urls.append(create_file_post_url(file_id, file.filename))
+
+    #TODO: Notify webhooks
+
+    delete_files(cur_bandoru.files)
+
+    return {"bandoru_id": bandoru["id"], "post_urls": urls}
 
 def get(bandoru_id: str, logged_username: Optional[str] = None) -> Optional[Bandoru]:
     pk = f"BANDORU#{bandoru_id}"
@@ -61,3 +100,43 @@ def get_by_user(user_id: str) -> list[Bandoru]:
     res = database.db_table.query(IndexName=database.user_idx, KeyConditionExpression=Key('GSI1PK').eq(pk))
     items = res["Items"] if "Items" in res else []
     return [Bandoru(**item) for item in items]
+
+def set_webhooks(bandoru_id: str, form: SetBandoruWebhooksForm, logged_username: Optional[str]):
+    if logged_username is None:
+        raise ServiceError(403, "Forbidden")
+
+    bandoru = get(bandoru_id, logged_username)
+    if bandoru is None:
+        raise NotFoundError
+    if bandoru.owner_id != logged_username:
+        raise ServiceError(403, "Forbidden")
+
+    pk = f"WEBHOOK#{bandoru_id}"
+    item = {
+        "PK": pk,
+        "SK": pk,
+        "urls": form.root
+    }
+
+    database.db_table.put_item(Item=item)
+
+def get_webhooks(bandoru_id: str, logged_username: Optional[str]) -> list[str]:
+    if logged_username is None:
+        raise ServiceError(403, "Forbidden")
+
+    bandoru = get(bandoru_id, logged_username)
+    if bandoru is None:
+        raise NotFoundError
+    if bandoru.owner_id != logged_username:
+        raise ServiceError(403, "Forbidden")
+
+    pk = f"WEBHOOK#{bandoru_id}"
+    res = database.db_table.get_item(Key={'PK':pk,'SK':pk})
+    if "Item" not in res:
+        return []
+
+    item = res["Item"]
+    if "urls" not in item:
+        return []
+
+    return item["urls"]
