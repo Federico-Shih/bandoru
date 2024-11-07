@@ -99,6 +99,36 @@ module "lambdas" {
       function_name = "get_bandoru"
       route         = "/bandoru/{id}"
     },
+    {
+      method        = "PUT"
+      function_name = "put_bandoru"
+      route         = "/bandoru/{id}"
+    },
+    {
+      method        = "GET"
+      function_name = "get_bandoru_webhooks"
+      route         = "/bandoru/{id}/webhooks"
+    },
+    {
+      method        = "PUT"
+      function_name = "put_bandoru_webhooks"
+      route         = "/bandoru/{id}/webhooks"
+    },
+    {
+      method        = "POST"
+      function_name = "post_bookmarks"
+      route         = "/users/{uid}/bookmarks"
+    },
+    {
+      method        = "GET"
+      function_name = "get_bookmarks"
+      route         = "/users/{uid}/bookmarks"
+    },
+    {
+      method        = "DELETE"
+      function_name = "delete_bookmarks"
+      route         = "/users/{uid}/bookmarks/{id}"
+    }
   ]
 
   #TODO: Add other env variables
