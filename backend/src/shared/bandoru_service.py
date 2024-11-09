@@ -115,7 +115,8 @@ def set_webhooks(bandoru_id: str, form: SetBandoruWebhooksForm, logged_username:
     item = {
         "PK": pk,
         "SK": pk,
-        "urls": form.root
+        "bandoru_id": bandoru_id,
+        "urls": form.root,
     }
 
     database.db_table.put_item(Item=item)
