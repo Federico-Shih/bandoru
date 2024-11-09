@@ -36,6 +36,10 @@ export class BundleRepository {
     return this.httpClient.get<BundleGetResponse[]>(`${API_URL}/bandoru?` + search.toString());
   }
 
+  getBookmarks(userId: string): Observable<BundleGetResponse[]> {
+    return this.httpClient.get<BundleGetResponse[]>(`${API_URL}/users/${userId}/bookmarks`);
+  }
+
   uploadFile(url: PresignedUrlResponse, file: File) {
     const formData = new FormData();
 

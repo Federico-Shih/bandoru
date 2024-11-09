@@ -25,6 +25,10 @@ export const routes: Routes = [
     path: 'my-bandorus',
     loadComponent: () => import('./features/my-bundles/my-bundles.component').then(m => m.MyBundlesComponent)
   },
+  {
+    path: 'my-bookmarks',
+    loadComponent: () => import('./features/my-bookmarks/my-bookmarks.component').then(m => m.MyBookmarksComponent)
+  },
 
   {
     path: '**',
