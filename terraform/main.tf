@@ -5,7 +5,7 @@ module "vpc" {
   name = "bandoru-vpc"
   cidr = "10.0.0.0/16"
 
-  azs = ["us-east-1a", "us-east-1b"]
+  azs = slice(data.aws_availability_zones.available_azs.names, 0, 2)
 
   public_subnets      = ["10.0.110.0/24", "10.0.120.0/24"]
   public_subnet_names = ["public_subnet_1", "public_subnet_2"]
@@ -78,6 +78,24 @@ resource "aws_vpc_security_group_egress_rule" "bandoru_lambda_sg_egress_rule" {
   cidr_ipv4   = "0.0.0.0/0"
 }
 
+
+resource "aws_sqs_queue" "failed_webhooks" {
+  name = "failed-webhooks-queue"
+}
+
+
+resource "aws_sqs_queue" "update-notifications" {
+  name                      = "update-notification-queue"
+  delay_seconds             = 0
+  max_message_size          = 4096
+  message_retention_seconds = 86400
+  redrive_policy = jsonencode({
+    deadLetterTargetArn = aws_sqs_queue.failed_webhooks.arn
+    maxReceiveCount     = 5 #retries
+  })
+  visibility_timeout_seconds = 6
+}
+
 module "lambdas" {
   depends_on = [module.vpc, aws_s3_bucket_website_configuration.spa-website-config, aws_cognito_user_pool_client.default-client]
 
@@ -133,12 +151,80 @@ module "lambdas" {
 
   #TODO: Add other env variables
   lambda_environment_variables = zipmap(
-    ["S3_BUCKET", "USER_POOL_ID", "APP_CLIENT_ID", "DB_TABLE", "DB_USER_IDX"],
-    [aws_s3_bucket.bandoru-bucket.id, aws_cognito_user_pool.pool.id, aws_cognito_user_pool_client.default-client.id, var.dynamodb-table-name, var.dynamodb-user-idx]
+    ["S3_BUCKET", "USER_POOL_ID", "APP_CLIENT_ID", "DB_TABLE", "DB_USER_IDX", "UPDATE_NOTIFICATION_SQS"],
+    [
+      aws_s3_bucket.bandoru-bucket.id,
+      aws_cognito_user_pool.pool.id,
+      aws_cognito_user_pool_client.default-client.id,
+      var.dynamodb-table-name,
+      var.dynamodb-user-idx,
+      aws_sqs_queue.update-notifications.url,
+    ]
   )
   api_gw_name             = "bandoru-api"
   vpc_subnets_ids         = module.vpc.private_subnets
   vpc_security_group_ids  = [aws_security_group.bandoru_lambda_sg.id]
   allowed_origins         = ["http://${aws_s3_bucket_website_configuration.spa-website-config.website_endpoint}", aws_apigatewayv2_api.spa-proxy.api_endpoint]
   path_to_placeholder_zip = "${abspath(path.root)}/hello.zip"
+}
+
+// SQS Lambda Trigger
+
+resource "aws_lambda_function" "update_notification_lambda" {
+  filename = "${abspath(path.root)}/hello.zip"
+  function_name    = "notify_update_webhook"
+  role             = data.aws_iam_role.lab_role.arn
+  handler          = "lambda_function.py"
+  runtime = "python3.12"
+  environment {
+    variables = {
+      "FRONTEND_URL" = aws_apigatewayv2_api.spa-proxy.api_endpoint
+    }
+  }
+  layers = ["arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:2"]
+}
+
+resource "aws_lambda_event_source_mapping" "update_notification_event_source_mapping" {
+  event_source_arn = aws_sqs_queue.update-notifications.arn
+  enabled          = true
+  function_name    = aws_lambda_function.update_notification_lambda.function_name
+  batch_size       = 5
+  maximum_batching_window_in_seconds = 5  # Cuanto espera a que se llene el buffer
+  # Enable failure reporting
+  function_response_types = ["ReportBatchItemFailures"]
+}
+resource "aws_lambda_permission" "allow_sqs_update" {
+  statement_id  = "AllowExecutionFromSQS"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.update_notification_lambda.function_name
+  principal     = "sqs.amazonaws.com"
+  source_arn    = aws_sqs_queue.update-notifications.arn
+}
+
+resource "aws_lambda_function" "save_failed_webhook_lambda" {
+  filename = "${abspath(path.root)}/hello.zip"
+  function_name    = "save_failed_webhook"
+  role             = data.aws_iam_role.lab_role.arn
+  handler          = "lambda_function.py"
+  runtime = "python3.12"
+  environment {
+    variables = {
+      "DB_TABLE" = var.dynamodb-table-name
+    }
+  }
+  layers = ["arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:2"]
+}
+resource "aws_lambda_permission" "allow_sqs_failed" {
+  statement_id  = "AllowExecutionFromSQS"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.save_failed_webhook_lambda.function_name
+  principal     = "sqs.amazonaws.com"
+  source_arn    = aws_sqs_queue.failed_webhooks.arn
+}
+
+resource "aws_lambda_event_source_mapping" "failed_notification_event_source_mapping" {
+  event_source_arn = aws_sqs_queue.failed_webhooks.arn
+  enabled          = true
+  function_name    = aws_lambda_function.save_failed_webhook_lambda.function_name
+  batch_size       = 5
 }
