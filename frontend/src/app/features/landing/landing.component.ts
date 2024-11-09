@@ -3,14 +3,15 @@ import {asFormControl, BundleFormType, SaveBundleFormService} from "../../shared
 import {BundleEditorComponent} from "../../shared/ui/bundle-editor/bundle-editor.component";
 import {BundleMetadataEditorComponent} from "../../shared/ui/bundle-metadata-editor/bundle-metadata-editor.component";
 import {BundleRepository} from "../../shared/data-access/bundle-repository/bundle-repository.service";
-import {map, Observable, retry, switchMap, take, zip, zipAll} from "rxjs";
+import {map, retry, switchMap, take, zip,filter, tap, merge} from "rxjs";
 import {AbstractControl, FormArray, FormGroup, ReactiveFormsModule} from "@angular/forms";
-import {Router} from "@angular/router";
+import {Router,ActivatedRoute} from "@angular/router";
 import {ToastService} from "../../shared/state/toast/toast.service";
 import {JsonPipe} from "@angular/common";
 import {AuthModalComponent} from "../../shared/ui/auth-modal/auth-modal.component";
 import { AuthService, NO_USER } from '../../shared/data-access/auth-service/auth.service';
-import { User } from '../../shared/models/User';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { HttpErrorResponse } from '@angular/common/http';
 
 enum State {
   OK,
@@ -25,7 +26,7 @@ enum State {
     BundleMetadataEditorComponent,
     ReactiveFormsModule,
     JsonPipe,
-    AuthModalComponent
+    AuthModalComponent,
   ],
   templateUrl: './landing.component.html',
   styleUrl: './landing.component.scss',
@@ -35,6 +36,8 @@ export class LandingComponent {
   bundleForm: BundleFormType;
   state: State = State.OK;
 
+  loadingBundle = signal(true);
+
   public UIState = State;
   @ViewChild(AuthModalComponent) authModal!: AuthModalComponent;
 
@@ -43,7 +46,42 @@ export class LandingComponent {
   constructor(private readonly saveBundleFormService: SaveBundleFormService,
               private readonly bundleRepository: BundleRepository,
               private readonly router: Router,
-              private readonly toast: ToastService) {
+              private readonly toast: ToastService,
+              private routeParams: ActivatedRoute) {
+
+    const textDecoder = new TextDecoder();
+    this.routeParams.queryParamMap
+      .pipe(takeUntilDestroyed(), map((queryParamMap) => queryParamMap.get('fork')))
+      .pipe(tap((param) => {
+        console.log(param);
+        this.loadingBundle.set(true);
+        if (!param) {
+          this.router.navigate(['/']);
+        }
+      }))
+      .pipe(filter((value): value is string => value !== null))
+      .pipe(switchMap((id) => this.bundleRepository.getBundle(id)))
+      .pipe(tap((bundle) => {
+        this.loadingBundle.set(false);
+        this.saveBundleFormService.loadBundle(bundle);
+      })).pipe(
+        switchMap(({ files }) => {
+          return merge(...files.map((file, index) => this.bundleRepository.downloadFile(file.url ?? '').pipe(map((fileContent) => ({ fileContent, ...file, index })))))
+        })
+      )
+      .subscribe({
+        next: ({ fileContent, index }) => {
+          const fileControl = this.bundleForm.controls.files.at(index).controls;
+          fileControl.loading.setValue(false);
+          fileControl.bundleText.setValue(textDecoder.decode(fileContent));
+        },
+        error: (err) => {
+          this.loadingBundle.set(false);
+          if (err instanceof HttpErrorResponse) {
+            this.router.navigate(['/']);
+          }
+        },
+      });
     this.bundleForm = saveBundleFormService.linkForm();
   }
 
