@@ -1,37 +1,50 @@
 <div class="p-3 w-full grid grid-cols-12 gap-x-4 auto-rows-max gap-y-4 h-screen overflow-y-scroll">
-    <aside class="col-span-12 md:col-span-3 flex flex-col gap-3">
-      <div class="md:hidden collapse collapse-arrow border-gray-700 border">
-        <input type="checkbox" />
-        <div class="collapse-title shadow-lg">Bundle details</div>
-        <div class="collapse-content">
-            Description: {{ this.form.controls.description.value }}
-        </div>
+  <aside class="col-span-12 md:col-span-3 flex flex-col gap-3">
+    <!--      <div class="md:hidden collapse collapse-arrow border-gray-700 border">-->
+    <!--        <input type="checkbox" />-->
+    <!--        <div class="collapse-title shadow-lg">Bundle details</div>-->
+    <!--        <div class="collapse-content">-->
+    <!--            Description: {{ this.form.controls.description.value }}-->
+    <!--        </div>-->
+    <!--      </div> TODO:Revisar si sacar esto -->
+    <div class="max-sm:hidden flex flex-col card shadow-sm  border border-gray-700">
+      <div class="card-body">
+        <h2 class="card-title text-lg">Description:</h2>
+        <div class="divider divider-vertical my-0 py-0"></div>
+        <p>
+          {{ this.form.controls.description.value }}
+        </p>
       </div>
-      <div class="max-sm:hidden flex flex-col card shadow-sm  border border-gray-700">
-        <div class="card-body">
-            <h2 class="card-title text-lg">Description:</h2>
-            <div class="divider divider-vertical my-0 py-0"></div>
-            <p>
-                {{ this.form.controls.description.value }}
-            </p>
-        </div>
+    </div>
+    <app-copy-link [url]="currentUrl"></app-copy-link>
+    <div class="flex flex-row items-center justify-end border border-gray-700 rounded-sm">
+      <p>
+        Would you like to create a copy?
+      </p>
+      <div class="p-3">
+        <a class="btn btn-active" (click)="fork()">
+          Fork
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+          </svg>
+        </a>
       </div>
-      <app-copy-link [url]="currentUrl"></app-copy-link>
-    </aside>
-    <section class="col-span-12 md:col-span-9 lg:col-span-8 xl:col-span-6 flex flex-col gap-3 items-stretch">
-      @if (loadingBundle()) {
-        <div class="w-full h-full flex justify-center items-center">
-          <span class="loading loading-bars loading-lg"></span>
-        </div>
-      } @else {
-        @for (file of form.controls.files.controls; track file.value.id) {
-          <app-bundle-editor [customControl]="file" [readOnly]="true">
+    </div>
+  </aside>
+  <section class="col-span-12 md:col-span-9 lg:col-span-8 xl:col-span-6 flex flex-col gap-3 items-stretch">
+    @if (loadingBundle()) {
+      <div class="w-full h-full flex justify-center items-center">
+        <span class="loading loading-bars loading-lg"></span>
+      </div>
+    } @else {
+      @for (file of form.controls.files.controls; track file.value.id) {
+        <app-bundle-editor [customControl]="file" [readOnly]="true">
 
-          </app-bundle-editor>
-        }
+        </app-bundle-editor>
       }
-      <div class="h-[200px] ">
-      
-      </div>
-    </section>
-  </div>
+    }
+    <div class="h-[200px] ">
+
+    </div>
+  </section>
+</div>

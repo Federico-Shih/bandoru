@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router} from '@angular/router';
 import { filter, map, merge, mergeAll, switchMap, tap } from 'rxjs';
 import { BundleRepository } from '../../shared/data-access/bundle-repository/bundle-repository.service';
 import { BundleGetResponse } from '../../shared/models/Bundle';
@@ -61,6 +61,13 @@ export class ViewBundleComponent {
   }
 
   currentUrl = window.location.href;
+
+  public getID(): string | null {
+    return this.routeParams.snapshot.paramMap.get('id');
+  }
+  public fork(){
+    this.router.navigate(['/'], { queryParams: { fork: this.getID() } });
+  }
 
   loadingBundle = signal(true);
 }
