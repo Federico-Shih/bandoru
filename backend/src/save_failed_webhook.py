@@ -14,6 +14,10 @@ def lambda_handler(event: dict, context: LambdaContext) -> dict:
             )
     except Exception as e:
         logger.error(f"Could not save failed webhook call to database: {e}")
+        return {
+            'statusCode': 500,
+            'body': f'{e}'
+        }
     return {
         'statusCode': 200,
         'body': ''

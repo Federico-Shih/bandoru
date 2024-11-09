@@ -31,7 +31,8 @@ export class NavbarComponent implements OnInit {
   ngOnInit(): void {
       this.router.events.subscribe({
         next: () => {
-          this.userDropdownRef.nativeElement.open = false;
+          if (this.userDropdownRef)
+            this.userDropdownRef.nativeElement.open = false;
         }
       })
   }

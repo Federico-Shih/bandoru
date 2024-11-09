@@ -6,6 +6,7 @@ import {BundleGetResponse, BundleUploadResponse, PresignedUrlResponse} from "../
 import {environment} from "../../../../environments/environment";
 import { Observable, of } from 'rxjs';
 import { WITHOUT_AUTH } from '../../interceptors/add-token.interceptor';
+import { map, catchError } from 'rxjs/operators';
 
 const API_URL = environment.apiUrl;
 
@@ -38,6 +39,30 @@ export class BundleRepository {
 
   getBookmarks(userId: string): Observable<BundleGetResponse[]> {
     return this.httpClient.get<BundleGetResponse[]>(`${API_URL}/users/${userId}/bookmarks`);
+  }
+
+  isBookmarked(userId: string, bundleId: string): Observable<boolean> {
+    return this.getBookmarks(userId).pipe(
+      map((bookmarks) => {
+        return bookmarks.some((bookmark) => bookmark.id === bundleId)
+      }),
+      catchError(() => of(false))
+    );
+  }
+
+  postBookmark(userId: string, bundleId: string) {
+    return this.httpClient.post(
+      `${API_URL}/users/${userId}/bookmarks`, 
+      `"${bundleId}"`, 
+      { 
+        headers: { 'Content-Type': 'application/json' },
+        responseType: 'text'
+      },
+    );
+  }
+
+  deleteBookmark(userId: string, bundleId: string) {
+    return this.httpClient.delete(`${API_URL}/users/${userId}/bookmarks/${bundleId}`);
   }
 
   uploadFile(url: PresignedUrlResponse, file: File) {

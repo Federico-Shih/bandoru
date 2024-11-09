@@ -48,7 +48,7 @@ export class MyBookmarksComponent implements OnInit {
       next: (bundles) => {
         this.bundles = bundles;
         this.loading = false;
-        if (bundles.length > 0) {
+        if (bundles === null || bundles.length > 0) {
           this.bundleRepository.getBundle(bundles[0].id).subscribe({
             next: (bundle) => {
               this.loadingBundle.set(false);
