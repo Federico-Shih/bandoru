@@ -1,12 +1,12 @@
 <!--We list the bundles(description,file,names,etc) that redirect to share/id-->
 <div class="w-full h-[110px] flex flex-row items-center justify-center overflow-x-scroll gap-6 pt-5 pr-5">
-  @if (bundles && user != "NO_USER"){
+  @if (bundles && bundles.length > 0 && user != "NO_USER"){
     @for (bundle of bundles; track bundle.id){
       <button (click)="loadBundle(bundle)">
         <div class="card  bg-base-300  w-48  shadow-xl hover:scale-105" >
           <div class="card-body p-4 overflow-hidden">
             <div class="flex flex-row items-center gap-3">
-              @if (bundle.private) {              
+              @if (bundle.private) {
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
                   <path fill-rule="evenodd" d="M12 1.5a5.25 5.25 0 0 0-5.25 5.25v3a3 3 0 0 0-3 3v6.75a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3v-6.75a3 3 0 0 0-3-3v-3c0-2.9-2.35-5.25-5.25-5.25Zm3.75 8.25v-3a3.75 3.75 0 1 0-7.5 0v3h7.5Z" clip-rule="evenodd" />
                 </svg>
@@ -44,7 +44,7 @@
 </div>
 <div class="divider my-0.5"></div>
 @if (!loadingBundle() && hasBundle() && bundles) {
-  <div class="p-3 w-full grid grid-cols-12 gap-x-4 auto-rows-max gap-y-4 h-screen overflow-y-scroll">
+  <div class="relative p-3 w-full grid grid-cols-12 gap-x-4 auto-rows-max gap-y-4 h-screen overflow-y-scroll">
     <aside class="col-span-12 md:col-span-3 flex flex-col gap-3">
       <div class="md:hidden collapse collapse-arrow border-gray-700 border">
         <input type="checkbox" />
@@ -52,7 +52,7 @@
         <div class="collapse-content">
             Description: {{ this.form.controls.description.value }}
             <span class="flex flex-row items-center gap-2 font-bold">
-              @if (this.form.value.private) {              
+              @if (this.form.value.private) {
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
                   <path fill-rule="evenodd" d="M12 1.5a5.25 5.25 0 0 0-5.25 5.25v3a3 3 0 0 0-3 3v6.75a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3v-6.75a3 3 0 0 0-3-3v-3c0-2.9-2.35-5.25-5.25-5.25Zm3.75 8.25v-3a3.75 3.75 0 1 0-7.5 0v3h7.5Z" clip-rule="evenodd" />
                 </svg>
@@ -73,8 +73,8 @@
             <p class="break-words">
                 {{ this.form.controls.description.value }}
             </p>
-            <span class="flex flex-row items-center gap-2 font-bold"> 
-              @if (this.form.value.private) {              
+            <span class="flex flex-row items-center gap-2 font-bold">
+              @if (this.form.value.private) {
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
                   <path fill-rule="evenodd" d="M12 1.5a5.25 5.25 0 0 0-5.25 5.25v3a3 3 0 0 0-3 3v6.75a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3v-6.75a3 3 0 0 0-3-3v-3c0-2.9-2.35-5.25-5.25-5.25Zm3.75 8.25v-3a3.75 3.75 0 1 0-7.5 0v3h7.5Z" clip-rule="evenodd" />
                 </svg>
@@ -89,6 +89,7 @@
         </div>
       </div>
       <app-copy-link [url]="currentUrl"></app-copy-link>
+      <app-webhook-editor />
     </aside>
     <section class="col-span-12 md:col-span-9 lg:col-span-8 xl:col-span-6 flex flex-col gap-3 items-stretch">
       @if (loadingFiles()) {
@@ -103,22 +104,48 @@
             <div class="skeleton h-4 w-full"></div>
             <div class="skeleton h-4 w-full"></div>
             <div class="skeleton h-4 w-full"></div>
-          </div>     
+          </div>
         </div>
       } @else {
         @for (file of form.controls.files.controls; track file.value.id) {
-          <app-bundle-editor [customControl]="file" [readOnly]="true">
-  
+          <app-bundle-editor [customControl]="file" (remove)="onFileRemove($event)" [readOnly]="!editable()">
+
           </app-bundle-editor>
         }
       }
+      @if (trySaved() && form.invalid && form.dirty) {
+        <div class="alert alert-warning">You cannot leave empty filenames nor empty contents</div>
+      }
+      @if (editable()) {
+        <section class="flex flex-row">
+          <button class="btn btn-primary" type="button" (click)="addFile()">Add File</button>
+          <div class="flex-1"></div>
+          <button [disabled]="savingBandoru()" class="btn btn-success px-6" type="button" (click)="saveBundle()">
+            @if (savingBandoru()) {
+              <span class="loading loading-spinner text-primary"></span>
+            } @else {
+              Save bandoru
+            }
+          </button>
+        </section>
+      }
       <div class="h-[200px] ">
-      
+
       </div>
     </section>
+    <button (click)="toggleEdit()" class="fixed max-md:bottom-5 mr-5 md:mr-10 right-0 btn btn-success px-5">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
+      </svg>
+      @if (editable()) {
+        Editing
+      } @else {
+        Edit
+      }
+    </button>
   </div>
 } @else if(loadingBundle() && bundles) {
   <div class="w-full h-full flex justify-center items-center">
-    <progress class="progress w-1/2"></progress>  
+    <progress class="progress w-1/2"></progress>
   </div>
 }
