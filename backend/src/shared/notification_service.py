@@ -1,3 +1,4 @@
+from typing import Optional
 import boto3
 from uuid import uuid4
 import json
@@ -18,7 +19,7 @@ def send_update_notification(bandoru_id: str, urls: list[str], desc: Optional[st
                 'Id': uuid4_to_base64(uuid4()),
                 'MessageBody': json.dumps({
                     'bandoru_id': bandoru_id,
-                    'desc': desc,
+                    'desc': desc if desc else 'Your Bandoru',
                     'webhook': url,
                     'timestamp': datetime.now(timezone.utc).isoformat(),
                     'type': 'bandoru-update-notification'

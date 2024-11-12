@@ -16,7 +16,7 @@ app = APIGatewayHttpResolver(enable_validation=True, cors=cors_config, debug=Tru
 
 @app.post("/bandoru/<bandoru_id>/updated")
 @tracer.capture_method
-def post_bandoru(bandoru_id: str):
+def post_bandoru_updated(bandoru_id: str):
     username = get_username_from_headers(app.current_event.headers)
     return bandoru_service.notify_updated(bandoru_id, username), 202
 

@@ -24,7 +24,7 @@ export class BundleRepository {
       private: bundle.private,
       parent_id: bundle.parent_id,
     } as BundleFormDto;
-    
+
     return this.httpClient.post<BundleUploadResponse>(`${API_URL}/bandoru`, bundleNoContents).pipe(this.uploadFileWithRetry(bundle));
   }
 
@@ -32,7 +32,8 @@ export class BundleRepository {
     return this.httpClient.put<BundleUploadResponse>(`${API_URL}/bandoru/${id}`, {
       description: bundle.description,
       files: bundle.files.map((file) => ({ filename: file.filename }))
-    }).pipe(this.uploadFileWithRetry(bundle));
+    }).pipe(this.uploadFileWithRetry(bundle))
+      .pipe(switchMap(() => this.notifyUploadFinished(id)));
   }
 
   uploadFileWithRetry(bundle: BundleFormDto) {
@@ -44,6 +45,10 @@ export class BundleRepository {
       });
       return zip(uploads).pipe(map(() => ({ ...bundleResponse})));
     });
+  }
+
+  notifyUploadFinished(id: string) {
+    return this.httpClient.post<null>(`${API_URL}/bandoru/${id}/updated`, null);
   }
 
   getBundle(id: string) {
