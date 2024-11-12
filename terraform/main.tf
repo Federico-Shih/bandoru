@@ -146,6 +146,11 @@ module "lambdas" {
       method        = "DELETE"
       function_name = "delete_bookmarks"
       route         = "/users/{uid}/bookmarks/{id}"
+    },
+    {
+      method        = "POST"
+      function_name = "post_bandoru_updated"
+      route         = "/bandoru/{id}/updated"
     }
   ]
 
@@ -171,11 +176,11 @@ module "lambdas" {
 // SQS Lambda Trigger
 
 resource "aws_lambda_function" "update_notification_lambda" {
-  filename = "${abspath(path.root)}/hello.zip"
-  function_name    = "notify_update_webhook"
-  role             = data.aws_iam_role.lab_role.arn
-  handler          = "lambda_function.py"
-  runtime = "python3.12"
+  filename      = "${abspath(path.root)}/hello.zip"
+  function_name = "notify_update_webhook"
+  role          = data.aws_iam_role.lab_role.arn
+  handler       = "lambda_function.py"
+  runtime       = "python3.12"
   environment {
     variables = {
       "FRONTEND_URL" = aws_apigatewayv2_api.spa-proxy.api_endpoint
@@ -185,11 +190,11 @@ resource "aws_lambda_function" "update_notification_lambda" {
 }
 
 resource "aws_lambda_event_source_mapping" "update_notification_event_source_mapping" {
-  event_source_arn = aws_sqs_queue.update-notifications.arn
-  enabled          = true
-  function_name    = aws_lambda_function.update_notification_lambda.function_name
-  batch_size       = 5
-  maximum_batching_window_in_seconds = 5  # Cuanto espera a que se llene el buffer
+  event_source_arn                   = aws_sqs_queue.update-notifications.arn
+  enabled                            = true
+  function_name                      = aws_lambda_function.update_notification_lambda.function_name
+  batch_size                         = 5
+  maximum_batching_window_in_seconds = 5 # Cuanto espera a que se llene el buffer
   # Enable failure reporting
   function_response_types = ["ReportBatchItemFailures"]
 }
@@ -202,11 +207,11 @@ resource "aws_lambda_permission" "allow_sqs_update" {
 }
 
 resource "aws_lambda_function" "save_failed_webhook_lambda" {
-  filename = "${abspath(path.root)}/hello.zip"
-  function_name    = "save_failed_webhook"
-  role             = data.aws_iam_role.lab_role.arn
-  handler          = "lambda_function.py"
-  runtime = "python3.12"
+  filename      = "${abspath(path.root)}/hello.zip"
+  function_name = "save_failed_webhook"
+  role          = data.aws_iam_role.lab_role.arn
+  handler       = "lambda_function.lambda_handler"
+  runtime       = "python3.12"
   environment {
     variables = {
       "DB_TABLE" = var.dynamodb-table-name

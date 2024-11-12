@@ -6,7 +6,7 @@ from aws_lambda_powertools import Logger
 from aws_lambda_powertools.event_handler.exceptions import *
 from boto3.dynamodb.conditions import Key
 
-from shared import database
+from shared import database, notification_service
 from shared.bandoru_s3_bucket import create_file_post_url, delete_files
 from shared.forms import CreateBandoruForm, SetBandoruWebhooksForm
 from shared.models import File, Bandoru
@@ -44,7 +44,7 @@ def create(form: CreateBandoruForm, logged_username: Optional[str] = None) -> di
 
 def replace(bandoru_id: str, form: CreateBandoruForm, logged_username: Optional[str] = None) -> dict:
     if logged_username is None:
-        raise ServiceError(403, "Forbidden")
+        raise ServiceError(401, "Unauthorized")
 
     cur_bandoru = get(bandoru_id, logged_username)
     if cur_bandoru is None:
@@ -101,9 +101,24 @@ def get_by_user(user_id: str) -> list[Bandoru]:
     items = res["Items"] if "Items" in res else []
     return [Bandoru(**item) for item in items]
 
+def notify_updated(bandoru_id: str, logged_user: Optional[str]):
+    if logged_user is None:
+        raise ServiceError(401, "Unauthorized")
+
+    bandoru = get(bandoru_id, logged_user)
+    if bandoru is None:
+        raise NotFoundError
+    if bandoru.owner_id != logged_user:
+        raise ServiceError(403, "Forbidden")
+
+    urls = get_webhooks(bandoru_id, logged_user)
+
+    notification_service.send_update_notification(bandoru_id, urls, bandoru.description)
+
+
 def set_webhooks(bandoru_id: str, form: SetBandoruWebhooksForm, logged_username: Optional[str]):
     if logged_username is None:
-        raise ServiceError(403, "Forbidden")
+        raise ServiceError(401, "Unauthorized")
 
     bandoru = get(bandoru_id, logged_username)
     if bandoru is None:
@@ -123,7 +138,7 @@ def set_webhooks(bandoru_id: str, form: SetBandoruWebhooksForm, logged_username:
 
 def get_webhooks(bandoru_id: str, logged_username: Optional[str]) -> list[str]:
     if logged_username is None:
-        raise ServiceError(403, "Forbidden")
+        raise ServiceError(401, "Unauthorized")
 
     bandoru = get(bandoru_id, logged_username)
     if bandoru is None:
