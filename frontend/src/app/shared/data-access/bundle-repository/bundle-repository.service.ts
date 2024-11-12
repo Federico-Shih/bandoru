@@ -18,7 +18,14 @@ export class BundleRepository {
 
 
   postBundle(bundle: BundleFormDto) {
-    return this.httpClient.post<BundleUploadResponse>(`${API_URL}/bandoru`, bundle).pipe(this.uploadFileWithRetry(bundle));
+    const bundleNoContents = {
+      files: bundle.files.map((file) => ({ filename: file.filename })),
+      description: bundle.description,
+      private: bundle.private,
+      parent_id: bundle.parent_id,
+    } as BundleFormDto;
+    
+    return this.httpClient.post<BundleUploadResponse>(`${API_URL}/bandoru`, bundleNoContents).pipe(this.uploadFileWithRetry(bundle));
   }
 
   putBundle(id: string, bundle: BundleFormDto) {
