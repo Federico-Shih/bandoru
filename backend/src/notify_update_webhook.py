@@ -43,8 +43,8 @@ def notify_webhook(event: dict):
     webhook = message.get("webhook")
     try:
         requests.post(webhook, json={
-                "content": f"[Bandoru]({FRONTEND_URL}/share/{message.get('bandoru-id')}) has been updated",
-                "bandoru_id": message.get("bandoru-id")
+                "content": f"['{message['desc']}']({FRONTEND_URL}/share/{message['bandoru_id']}) has been updated",
+                "bandoru_id": message.get("bandoru-id"),
                 "timestamp": message.get("timestamp")
         }, timeout=5)
         return None
