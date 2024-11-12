@@ -51,7 +51,7 @@ export class ViewBundleComponent {
       .pipe(filter((value): value is string => value !== null))
       .pipe(switchMap((id) => {
         this.bundleId = id;
-        this.authService.getUser().subscribe({
+        this.authService.getAuthUser().subscribe({
           next: (user) => {
             if (user != "NO_USER") {
               this.userId = user.id;

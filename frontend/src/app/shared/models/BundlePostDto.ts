@@ -1,6 +1,6 @@
 export type FileDto = {
   filename: string;
-  bundleText: string;
+  bundleText: string | undefined;
 }
 
 export type PossibleFileDto = {
