@@ -4,7 +4,7 @@ import {BundleFormDto} from "../../models/BundlePostDto";
 import {BundleGetResponse, BundleUploadResponse, PresignedUrlResponse} from "../../models/Bundle";
 
 import {environment} from "../../../../environments/environment";
-import { Observable, of } from 'rxjs';
+import {Observable, of, retry, switchMap, zip} from 'rxjs';
 import { WITHOUT_AUTH } from '../../interceptors/add-token.interceptor';
 import { map, catchError } from 'rxjs/operators';
 
@@ -18,7 +18,25 @@ export class BundleRepository {
 
 
   postBundle(bundle: BundleFormDto) {
-    return this.httpClient.post<BundleUploadResponse>(`${API_URL}/bandoru`, bundle);
+    return this.httpClient.post<BundleUploadResponse>(`${API_URL}/bandoru`, bundle).pipe(this.uploadFileWithRetry(bundle));
+  }
+
+  putBundle(id: string, bundle: BundleFormDto) {
+    return this.httpClient.put<BundleUploadResponse>(`${API_URL}/bandoru/${id}`, {
+      description: bundle.description,
+      files: bundle.files.map((file) => ({ filename: file.filename }))
+    }).pipe(this.uploadFileWithRetry(bundle));
+  }
+
+  uploadFileWithRetry(bundle: BundleFormDto) {
+    return switchMap((bundleResponse: BundleUploadResponse) => {
+      const uploads = bundleResponse.post_urls.map((url, index) => {
+        const blob = new Blob([bundle?.files?.[index]?.bundleText ?? '']);
+        const file = new File([blob], "placeholder_filename");
+        return this.uploadFile(url, file).pipe(retry(2));
+      });
+      return zip(uploads).pipe(map(() => ({ ...bundleResponse})));
+    });
   }
 
   getBundle(id: string) {
@@ -26,15 +44,13 @@ export class BundleRepository {
   }
 
   getBundles(userId: string): Observable<BundleGetResponse[]> {
-    // return of([{
-    //   id: "hola",
-    //   description: "aaaaa",
-    //   files: [],
-    //   created_at: new Date(),
-    //   last_modified: new Date(),
-    // }]);
     const search = new URLSearchParams({ user: userId });
-    return this.httpClient.get<BundleGetResponse[]>(`${API_URL}/bandoru?` + search.toString());
+    return this.httpClient.get<BundleGetResponse[]>(`${API_URL}/bandoru?` + search.toString(), { observe: 'response' }).pipe(map((response) => {
+      if (response.status === 204) {
+        return [];
+      }
+      return response.body ?? [];
+    }));
   }
 
   getBookmarks(userId: string): Observable<BundleGetResponse[]> {
@@ -52,9 +68,9 @@ export class BundleRepository {
 
   postBookmark(userId: string, bundleId: string) {
     return this.httpClient.post(
-      `${API_URL}/users/${userId}/bookmarks`, 
-      `"${bundleId}"`, 
-      { 
+      `${API_URL}/users/${userId}/bookmarks`,
+      `"${bundleId}"`,
+      {
         headers: { 'Content-Type': 'application/json' },
         responseType: 'text'
       },
@@ -84,5 +100,13 @@ export class BundleRepository {
       responseType: "arraybuffer",
       context: new HttpContext().set(WITHOUT_AUTH, true)
     });
+  }
+
+  putWebhooks(bandoruId: string, webhooks: string[]) {
+    return this.httpClient.put(`${API_URL}/bandoru/${bandoruId}/webhooks`, webhooks);
+  }
+
+  getWebhooks(bandoruId: string) {
+    return this.httpClient.get<string[]>(`${API_URL}/bandoru/${bandoruId}/webhooks`);
   }
 }

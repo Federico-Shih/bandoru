@@ -12,6 +12,7 @@ import {AuthModalComponent} from "../../shared/ui/auth-modal/auth-modal.componen
 import { AuthService, NO_USER } from '../../shared/data-access/auth-service/auth.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpErrorResponse } from '@angular/common/http';
+import {fromPartialFile} from "../../shared/models/BundlePostDto";
 
 enum State {
   OK,
@@ -127,18 +128,12 @@ export class LandingComponent {
     }
     this.state = State.SENDING;
     const bundle = bundleForm.getRawValue();
+    // TODO: move upload file logic to repository
     this.bundleRepository.postBundle({
       description: bundle.description ?? '',
-      files: (bundle.files ?? []).map(file => ({ filename: file.fileName || '' })),
+      files: (bundle.files ?? []).map(fromPartialFile),
       private: bundle.private!,
-    }).pipe(switchMap((bundleResponse) => {
-      const uploads = bundleResponse.post_urls.map((url, index) => {
-        const blob = new Blob([bundle?.files?.[index]?.bundleText ?? '']);
-        const file = new File([blob], "placeholder_filename");
-        return this.bundleRepository.uploadFile(url, file).pipe(retry(2));
-      });
-      return zip(uploads).pipe(map(() => ({ ...bundleResponse})));
-    })).subscribe({
+    }).subscribe({
       next: ({ bandoru_id }) => {
         this.state = State.OK;
         this.toast.success('Bundle created successfully!');
