@@ -4,23 +4,31 @@ import { AuthService } from '../../shared/data-access/auth-service/auth.service'
 import { map, merge, switchMap } from 'rxjs';
 import {BundleGetResponse} from "../../shared/models/Bundle";
 import {User} from "../../shared/models/User";
-import {RouterModule} from "@angular/router";
+import {Router, RouterModule} from "@angular/router";
 import { CopyLinkComponent } from "../../shared/ui/copy-link/copy-link.component";
 import { BundleEditorComponent } from "../../shared/ui/bundle-editor/bundle-editor.component";
 import { SaveBundleFormService } from '../../shared/state/save-bundle-form/save-bundle-form.service';
+import { BookmarkState, BookmarkButtonComponent } from '../../shared/ui/bookmark-button/bookmark-button.component';
+import { ForkLinkComponent } from "../../shared/ui/fork-link/fork-link.component";
 
 @Component({
   selector: 'app-my-bundles',
   standalone: true,
-  imports: [RouterModule, CopyLinkComponent, BundleEditorComponent,],
+  imports: [RouterModule, CopyLinkComponent, BundleEditorComponent, BookmarkButtonComponent, ForkLinkComponent],
   providers: [SaveBundleFormService],
   templateUrl: './my-bookmarks.component.html',
   styleUrl: './my-bookmarks.component.scss'
 })
 export class MyBookmarksComponent implements OnInit {
+  public BookmarkState = BookmarkState;
+  private bookmarkState = signal<BookmarkState>(BookmarkState.LOADING);
+  private userId: string | undefined = undefined;
+  private bundleId: string | undefined = undefined;
+
   bundleRepository = inject(BundleRepository);
   authService = inject(AuthService);
   bundleService = inject(SaveBundleFormService);
+  router = inject(Router);
 
   bundles:BundleGetResponse[] | null = null;
   loading: boolean = true;
@@ -38,8 +46,10 @@ export class MyBookmarksComponent implements OnInit {
       switchMap((user) => {
           if (user != "NO_USER") {
             this.user = user;
+            this.userId = user.id;
             return this.bundleRepository.getBookmarks(user.id);
           }else{
+            this.bookmarkState.set(BookmarkState.NO_USER);
             return [];
           }
         }
@@ -77,6 +87,7 @@ export class MyBookmarksComponent implements OnInit {
     this.loadingFiles.set(true);
     this.bundleService.loadBundle(bundle);
     this.hasBundle.set(true);
+    this.bundleId = bundle.id;
     this.bundleRepository.getBundle(bundle.id).pipe(
       switchMap(({ files }) => {
         return merge(...files.map((file, index) => this.bundleRepository.downloadFile(file.url ?? '').pipe(map((fileContent) => ({ fileContent, ...file, index })))))
@@ -93,8 +104,49 @@ export class MyBookmarksComponent implements OnInit {
         this.loadingBundle.set(false);
         this.loadingFiles.set(false);
       },
-    })
+    });
+    this.bundleRepository.isBookmarked(this.userId!, bundle.id).subscribe({
+      next: (isBookmarked) => {
+        if (isBookmarked) {
+          this.bookmarkState.set(BookmarkState.BOOKMARKED);
+        } else {
+          this.bookmarkState.set(BookmarkState.NOT_BOOKMARKED);
+        }
+      }
+    });
 
+  }
+
+  getBookmarkState(): BookmarkState {
+    return this.bookmarkState();
+  }
+
+  bookmarkBundle() {
+    if (!this.userId || !this.bundleId) {
+      return;
+    }
+    this.bookmarkState.set(BookmarkState.LOADING);
+    this.bundleRepository.postBookmark(this.userId, this.bundleId).subscribe({
+      next: () => {
+        this.bookmarkState.set(BookmarkState.BOOKMARKED);
+      }
+    });
+  }
+
+  unbookmarkBundle() {
+    if (!this.userId || !this.bundleId) {
+      return;
+    }
+    this.bookmarkState.set(BookmarkState.LOADING);
+    this.bundleRepository.deleteBookmark(this.userId, this.bundleId).subscribe({
+      next: () => {
+        this.bookmarkState.set(BookmarkState.NOT_BOOKMARKED);
+      }
+    });
+  }
+
+  public fork(){
+    this.router.navigate(['/'], { queryParams: { fork: this.bundleId } });
   }
 
 }

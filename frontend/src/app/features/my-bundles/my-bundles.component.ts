@@ -4,27 +4,35 @@ import { AuthService } from '../../shared/data-access/auth-service/auth.service'
 import {map, merge, retry, switchMap, zip} from 'rxjs';
 import {BundleGetResponse} from "../../shared/models/Bundle";
 import {User} from "../../shared/models/User";
-import {RouterModule} from "@angular/router";
+import {Router, RouterModule} from "@angular/router";
 import { CopyLinkComponent } from "../../shared/ui/copy-link/copy-link.component";
 import { BundleEditorComponent } from "../../shared/ui/bundle-editor/bundle-editor.component";
 import { SaveBundleFormService } from '../../shared/state/save-bundle-form/save-bundle-form.service';
 import {fromPartialFile} from "../../shared/models/BundlePostDto";
 import {ToastService} from "../../shared/state/toast/toast.service";
 import {WebhookEditorComponent} from "../../shared/ui/webhook-editor/webhook-editor.component";
+import { BookmarkButtonComponent, BookmarkState } from "../../shared/ui/bookmark-button/bookmark-button.component";
+import { ForkLinkComponent } from "../../shared/ui/fork-link/fork-link.component";
 
 @Component({
   selector: 'app-my-bundles',
   standalone: true,
-  imports: [RouterModule, CopyLinkComponent, BundleEditorComponent, WebhookEditorComponent,],
+  imports: [RouterModule, CopyLinkComponent, BundleEditorComponent, WebhookEditorComponent, BookmarkButtonComponent, ForkLinkComponent],
   providers: [SaveBundleFormService],
   templateUrl: './my-bundles.component.html',
   styleUrl: './my-bundles.component.scss'
 })
 export class MyBundlesComponent implements OnInit {
+  public BookmarkState = BookmarkState;
+  private bookmarkState = signal<BookmarkState>(BookmarkState.LOADING);
+  private userId: string | undefined = undefined;
+  private bundleId: string | undefined = undefined;
+
   bundleRepository = inject(BundleRepository);
   authService = inject(AuthService);
   bundleService = inject(SaveBundleFormService);
   toast = inject(ToastService);
+  router = inject(Router);
 
   bundles: BundleGetResponse[] | null = null;
   loading: boolean = true;
@@ -47,8 +55,10 @@ export class MyBundlesComponent implements OnInit {
       switchMap((user) => {
           if (user != "NO_USER") {
             this.user = user;
+            this.userId = user.id;
             return this.bundleRepository.getBundles(user.id);
           }else{
+            this.bookmarkState.set(BookmarkState.NO_USER);
             return [];
           }
         }
@@ -82,6 +92,7 @@ export class MyBundlesComponent implements OnInit {
     this.bundleService.loadBundle(bundle);
     this.hasBundle.set(true);
     this.selectedBundle.set(bundle);
+    this.bundleId = bundle.id;
     this.bundleRepository.getBundle(bundle.id).pipe(
       switchMap(({ files }) => {
         return merge(...files.map((file, index) => this.bundleRepository.downloadFile(file.url ?? '').pipe(map((fileContent) => ({ fileContent, ...file, index })))))
@@ -99,6 +110,15 @@ export class MyBundlesComponent implements OnInit {
         this.loadingFiles.set(false);
       },
     })
+    this.bundleRepository.isBookmarked(this.userId!, bundle.id).subscribe({
+      next: (isBookmarked) => {
+        if (isBookmarked) {
+          this.bookmarkState.set(BookmarkState.BOOKMARKED);
+        } else {
+          this.bookmarkState.set(BookmarkState.NOT_BOOKMARKED);
+        }
+      }
+    });
   }
 
   onFileRemove(index: number) {
@@ -143,5 +163,37 @@ export class MyBundlesComponent implements OnInit {
 
   toggleEdit() {
     this.editable.update((prev) => !prev);
+  }
+
+  getBookmarkState(): BookmarkState {
+    return this.bookmarkState();
+  }
+
+  bookmarkBundle() {
+    if (!this.userId || !this.bundleId) {
+      return;
+    }
+    this.bookmarkState.set(BookmarkState.LOADING);
+    this.bundleRepository.postBookmark(this.userId, this.bundleId).subscribe({
+      next: () => {
+        this.bookmarkState.set(BookmarkState.BOOKMARKED);
+      }
+    });
+  }
+
+  unbookmarkBundle() {
+    if (!this.userId || !this.bundleId) {
+      return;
+    }
+    this.bookmarkState.set(BookmarkState.LOADING);
+    this.bundleRepository.deleteBookmark(this.userId, this.bundleId).subscribe({
+      next: () => {
+        this.bookmarkState.set(BookmarkState.NOT_BOOKMARKED);
+      }
+    });
+  }
+
+  public fork(){
+    this.router.navigate(['/'], { queryParams: { fork: this.bundleId } });
   }
 }
