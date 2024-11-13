@@ -9,18 +9,15 @@ import { BundleEditorComponent } from '../../shared/ui/bundle-editor/bundle-edit
 import {BundleFormType, SaveBundleFormService} from "../../shared/state/save-bundle-form/save-bundle-form.service";
 import { CopyLinkComponent } from "../../shared/ui/copy-link/copy-link.component";
 import { AuthService } from '../../shared/data-access/auth-service/auth.service';
+import { ForkLinkComponent } from "../../shared/ui/fork-link/fork-link.component";
+import { BookmarkState, BookmarkButtonComponent } from '../../shared/ui/bookmark-button/bookmark-button.component';
 
-enum BookmarkState {
-  NO_USER,
-  NOT_BOOKMARKED,
-  BOOKMARKED,
-  LOADING
-}
+
 
 @Component({
   selector: 'app-view-bundle',
   standalone: true,
-  imports: [BundleEditorComponent, CopyLinkComponent],
+  imports: [BundleEditorComponent, CopyLinkComponent, ForkLinkComponent, BookmarkButtonComponent],
   templateUrl: './view-bundle.component.html',
   providers: [SaveBundleFormService]
 })
