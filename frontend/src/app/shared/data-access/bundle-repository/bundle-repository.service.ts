@@ -1,7 +1,12 @@
 import { Injectable } from '@angular/core';
 import {HttpClient, HttpContext} from "@angular/common/http";
 import {BundleFormDto} from "../../models/BundlePostDto";
-import {BundleGetResponse, BundleUploadResponse, PresignedUrlResponse} from "../../models/Bundle";
+import {
+  BundleGetResponse,
+  BundleUploadResponse,
+  ExecutionFailResponse,
+  PresignedUrlResponse
+} from "../../models/Bundle";
 
 import {environment} from "../../../../environments/environment";
 import {Observable, of, retry, switchMap, zip} from 'rxjs';
@@ -31,6 +36,8 @@ export class BundleRepository {
   putBundle(id: string, bundle: BundleFormDto) {
     return this.httpClient.put<BundleUploadResponse>(`${API_URL}/bandoru/${id}`, {
       description: bundle.description,
+      private: bundle.private,
+      parent_id: bundle.parent_id,
       files: bundle.files.map((file) => ({ filename: file.filename }))
     }).pipe(this.uploadFileWithRetry(bundle))
       .pipe(switchMap(() => this.notifyUploadFinished(id)));
@@ -120,5 +127,9 @@ export class BundleRepository {
 
   getWebhooks(bandoruId: string) {
     return this.httpClient.get<string[]>(`${API_URL}/bandoru/${bandoruId}/webhooks`);
+  }
+
+  getFailedExecutions(bandoruId: string) {
+    return this.httpClient.get<ExecutionFailResponse[] | null>(`${API_URL}/bandoru/${bandoruId}/failed_webhooks`).pipe(map((result) => result ?? [] ));
   }
 }

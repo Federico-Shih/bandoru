@@ -31,10 +31,11 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 }
 """
 
-FRONTEND_URL=os.getenv("FRONTEND_URL")
+FRONTEND_URL = os.getenv("FRONTEND_URL")
 
 tracer = Tracer()
 logger = Logger()
+
 
 @tracer.capture_method
 def notify_webhook(event: dict):
@@ -42,15 +43,24 @@ def notify_webhook(event: dict):
     message = json.loads(body)
     webhook = message.get("webhook")
     try:
-        requests.post(webhook, json={
+        request = requests.post(
+            webhook,
+            json={
                 "content": f"['{message['desc']}']({FRONTEND_URL}/share/{message['bandoru_id']}) has been updated",
                 "bandoru_id": message.get("bandoru-id"),
-                "timestamp": message.get("timestamp")
-        }, timeout=5)
+                "timestamp": message.get("timestamp"),
+            },
+            timeout=5,
+        )
+        if request.status_code > 299:
+            logger.error(
+                f"Failed to notify webhook {webhook} with status code {request.status_code}"
+            )
+            return event["messageId"]
         return None
     except Exception as e:
-        logger.error('Failed to notify webhook', exc_info=e)
-        return body.get("messageId")
+        logger.error("Failed to notify webhook", exc_info=e)
+        return event["messageId"]
 
 
 @logger.inject_lambda_context()
@@ -60,6 +70,7 @@ def lambda_handler(event: dict, context: LambdaContext) -> dict:
     with ThreadPoolExecutor() as executor:
         results = list(executor.map(notify_webhook, event["Records"]))
     failed_ids = list(filter(lambda x: x is not None, results))
+    logger.info("Failed ids " + str(failed_ids))
     return map_failed_batches(failed_ids)
 
 

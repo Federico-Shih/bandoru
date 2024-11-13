@@ -1,8 +1,9 @@
-import {Component, effect, EventEmitter, inject, input, Output} from '@angular/core';
+import {Component, effect, ElementRef, EventEmitter, inject, input, Output, ViewChild} from '@angular/core';
 import {FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
-import {NgOptimizedImage} from "@angular/common";
+import {DatePipe, NgOptimizedImage} from "@angular/common";
 import {ToastService} from "../../state/toast/toast.service";
 import {HttpClient} from "@angular/common/http";
+import {ExecutionFailResponse} from "../../models/Bundle";
 
 const WEBHOOK_STATUS = {
   UNTESTED: 'untested',
@@ -23,7 +24,8 @@ type Webhook = {
   standalone: true,
   imports: [
     NgOptimizedImage,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    DatePipe
   ],
   templateUrl: './webhook-editor.component.html',
   styleUrl: './webhook-editor.component.scss'
@@ -32,6 +34,9 @@ export class WebhookEditorComponent {
   MAX_WEBHOOKS = 5;
   toast = inject(ToastService);
   httpClient = inject(HttpClient);
+
+  @ViewChild('dialogRef') dialogRef!: ElementRef<HTMLDialogElement>;
+
   form = new FormGroup({
     webhooks: new FormArray<FormGroup<{
       webhook: FormControl<string | null>,
@@ -45,10 +50,11 @@ export class WebhookEditorComponent {
     });
   }
 
-  initializeWebhooks(webhooks: string[]) {
+  initializeWebhooks(webhooks: string[] | null) {
     this.form.controls.webhooks.clear();
-    if (webhooks.length === 0) {
+    if (!webhooks || webhooks.length === 0) {
       this.form.controls.webhooks.push(this.buildWebhookForm(''))
+      return;
     }
     webhooks.forEach((webhook) => {
       this.form.controls.webhooks.push(this.buildWebhookForm(webhook));
@@ -106,7 +112,11 @@ export class WebhookEditorComponent {
 
   webhooks = input<string[]>([]);
   loading = input<boolean>(false);
-
+  executions = input<ExecutionFailResponse[]>([]);
   @Output()
   save = new EventEmitter<string[]>();
+
+  showExecutions() {
+    this.dialogRef.nativeElement.showModal();
+  }
 }

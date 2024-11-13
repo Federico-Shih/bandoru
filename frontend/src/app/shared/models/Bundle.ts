@@ -23,3 +23,8 @@ export type BundleFileGetResponse = {
   filename: string;
   url?: string;
 }
+
+export type ExecutionFailResponse = {
+  webhook_url: string;
+  timestamp: string;
+}

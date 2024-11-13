@@ -94,7 +94,10 @@
       </div>
       <app-copy-link [url]="currentUrl"></app-copy-link>
       <app-fork-link (onClick)="fork()"></app-fork-link>
-      <app-webhook-editor [webhooks]="webhooks()" [loading]="savingWebhooks()" (save)="saveWebhooks($event)" />
+      <app-webhook-editor [executions]="webhookExecutions()" [webhooks]="webhooks()" [loading]="savingWebhooks()" (save)="saveWebhooks($event)" />
+      <div class="h-[200px]">
+
+      </div>
     </aside>
     <section class="col-span-12 md:col-span-9 lg:col-span-8 xl:col-span-6 flex flex-col gap-3 items-stretch">
       @if (loadingFiles()) {

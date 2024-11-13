@@ -3,9 +3,16 @@ from typing import Optional
 from pydantic import BaseModel, UUID4
 
 
+class FailedWebhook(BaseModel):
+    bandoru_id: str
+    webhook_url: str
+    timestamp: str
+
+
 class File(BaseModel):
     id: str
     filename: str
+
 
 class Bandoru(BaseModel):
     id: str

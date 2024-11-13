@@ -2,7 +2,7 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { BundleRepository } from '../../shared/data-access/bundle-repository/bundle-repository.service';
 import { AuthService } from '../../shared/data-access/auth-service/auth.service';
 import {map, merge, retry, switchMap, zip} from 'rxjs';
-import {BundleGetResponse} from "../../shared/models/Bundle";
+import {BundleGetResponse, ExecutionFailResponse} from "../../shared/models/Bundle";
 import {User} from "../../shared/models/User";
 import {Router, RouterModule} from "@angular/router";
 import { CopyLinkComponent } from "../../shared/ui/copy-link/copy-link.component";
@@ -53,6 +53,7 @@ export class MyBundlesComponent implements OnInit {
   // Webhooks
   savingWebhooks = signal(false);
   webhooks = signal<string[]>([]);
+  webhookExecutions = signal<ExecutionFailResponse[]>([]);
 
   ngOnInit(): void {
     this.authService.getUser().pipe(
@@ -101,6 +102,12 @@ export class MyBundlesComponent implements OnInit {
     this.bundleRepository.getWebhooks(bundle.id).subscribe({
       next: (webhooks) => {
         this.webhooks.set(webhooks);
+      }
+    });
+
+    this.bundleRepository.getFailedExecutions(bundle.id).subscribe({
+      next: (results) => {
+        this.webhookExecutions.set(results);
       }
     });
 

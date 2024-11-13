@@ -109,7 +109,7 @@ resource "aws_sqs_queue" "update-notifications" {
   message_retention_seconds = 86400
   redrive_policy = jsonencode({
     deadLetterTargetArn = aws_sqs_queue.failed_webhooks.arn
-    maxReceiveCount     = 5 #retries
+    maxReceiveCount     = 3 #retries
   })
   visibility_timeout_seconds = 6
 }
@@ -169,6 +169,11 @@ module "lambdas" {
       method        = "POST"
       function_name = "post_bandoru_updated"
       route         = "/bandoru/{id}/updated"
+    },
+    {
+      method        = "GET"
+      function_name = "get_failed_webhooks"
+      route         = "/bandoru/{id}/failed_webhooks"
     }
   ]
 

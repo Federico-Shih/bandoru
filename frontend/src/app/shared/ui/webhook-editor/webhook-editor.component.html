@@ -1,28 +1,52 @@
+<dialog #dialogRef class="modal ">
+  <div class="modal-box flex flex-col min-w-[700px]">
+    <h6 class="font-bold text-lg">Failed notified webhooks</h6>
+    <div class="divider divider-vertical"></div>
+    <ul class="flex flex-col">
+      @for (execution of executions(); track $index) {
+        <li class="grid auto-rows-auto grid-cols-12">
+          <span class="col-span-3">{{execution.timestamp | date:'dd/MM/yyyy HH:mm' }}</span>
+          <span class="col-span-9 truncate text-nowrap">{{execution.webhook_url}}</span>
+        </li>
+      }
+    </ul>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>
+
 <section class="card shadow-sm  border border-gray-700">
   <div class="card-body p-3">
     <h6 class="card-title flex items-center flex-row">
       <img ngSrc="assets/webhook.svg" alt="Webhook" height="30" width="30"/>
       Webhooks
+      <div class="flex-1"></div>
+      <button class="btn btn-circle" (click)="showExecutions()">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
+        </svg>
+      </button>
     </h6>
     <div class="flex flex-col w-full pt-3 gap-2">
       @for (webhook of form.controls.webhooks.controls; track $index) {
         <div class="flex flex-row gap-2">
-          <label class="input input-bordered input-md flex items-center flex-1">
-            <input
-              [formControl]="webhook.controls.webhook"
-              type="text"
-              placeholder="https://example.com/webhook" class="grow"
-            />
-          </label>
+          <input
+            [formControl]="webhook.controls.webhook"
+            type="text"
+            placeholder="https://example.com/webhook"
+            class="input input-bordered input-md w-full max-w-xs"
+          />
           <div class="join">
-            <button (click)="deleteWebhook($index)" class="btn btn-square join-item">
+            <button title="Delete webhook" (click)="deleteWebhook($index)" class="btn btn-square join-item">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
               </svg>
             </button>
-            <button class="btn btn-primary btn-square join-item" (click)="testWebhook($index)">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M8.288 15.038a5.25 5.25 0 0 1 7.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 0 1 1.06 0Z" />
+            <button title="Test webhook" class="btn btn-primary btn-square join-item" (click)="testWebhook($index)">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75a4.5 4.5 0 0 1-4.884 4.484c-1.076-.091-2.264.071-2.95.904l-7.152 8.684a2.548 2.548 0 1 1-3.586-3.586l8.684-7.152c.833-.686.995-1.874.904-2.95a4.5 4.5 0 0 1 6.336-4.486l-3.276 3.276a3.004 3.004 0 0 0 2.25 2.25l3.276-3.276c.256.565.398 1.192.398 1.852Z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.867 19.125h.008v.008h-.008v-.008Z" />
               </svg>
             </button>
           </div>
@@ -33,19 +57,17 @@
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
           </svg>
-          Add webhook
+         <span class="max-xl:hidden">Add webhook</span>
         </button>
-        <button [disabled]="loading()" class="btn btn-success flex-1" (click)="saveWebhooks()">
+        <button [disabled]="loading()" class="btn btn-success flex-1 min-w-28" (click)="saveWebhooks()">
           @if (loading()) {
             <span class="loading loading-spinner text-primary"></span>
           } @else {
             <ng-container>
-              <span class="max-md:hidden">Save webhooks</span>
-              <span class="sm:hidden">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                </svg>
-              </span>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+              </svg>
+              <span class="max-md:hidden">Save</span>
             </ng-container>
           }
         </button>

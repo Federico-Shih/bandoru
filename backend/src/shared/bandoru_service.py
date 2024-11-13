@@ -9,7 +9,7 @@ from boto3.dynamodb.conditions import Key
 from shared import database, notification_service
 from shared.bandoru_s3_bucket import create_file_post_url, delete_files
 from shared.forms import CreateBandoruForm, SetBandoruWebhooksForm
-from shared.models import File, Bandoru
+from shared.models import File, Bandoru, FailedWebhook
 from shared.utils import uuid4_to_base64
 
 logger = Logger()
@@ -42,7 +42,10 @@ def create(form: CreateBandoruForm, logged_username: Optional[str] = None) -> di
 
     return {"bandoru_id": bandoru["id"], "post_urls": urls}
 
-def replace(bandoru_id: str, form: CreateBandoruForm, logged_username: Optional[str] = None) -> dict:
+
+def replace(
+    bandoru_id: str, form: CreateBandoruForm, logged_username: Optional[str] = None
+) -> dict:
     if logged_username is None:
         raise ServiceError(401, "Unauthorized")
 
@@ -76,15 +79,16 @@ def replace(bandoru_id: str, form: CreateBandoruForm, logged_username: Optional[
         file_id = file.id
         urls.append(create_file_post_url(file_id, file.filename))
 
-    #TODO: Notify webhooks
+    # TODO: Notify webhooks
 
     delete_files(cur_bandoru.files)
 
     return {"bandoru_id": bandoru["id"], "post_urls": urls}
 
+
 def get(bandoru_id: str, logged_username: Optional[str] = None) -> Optional[Bandoru]:
     pk = f"BANDORU#{bandoru_id}"
-    res = database.db_table.get_item(Key={'PK':pk,'SK':pk})
+    res = database.db_table.get_item(Key={"PK": pk, "SK": pk})
     item = res["Item"] if "Item" in res else None
 
     bandoru: Optional[Bandoru] = None
@@ -94,12 +98,16 @@ def get(bandoru_id: str, logged_username: Optional[str] = None) -> Optional[Band
             raise ServiceError(403, "Forbidden")
     return bandoru
 
-def get_by_user(user_id: str) -> list[Bandoru]:
-    pk = f'USER#{user_id}'
 
-    res = database.db_table.query(IndexName=database.user_idx, KeyConditionExpression=Key('GSI1PK').eq(pk))
+def get_by_user(user_id: str) -> list[Bandoru]:
+    pk = f"USER#{user_id}"
+
+    res = database.db_table.query(
+        IndexName=database.user_idx, KeyConditionExpression=Key("GSI1PK").eq(pk)
+    )
     items = res["Items"] if "Items" in res else []
     return [Bandoru(**item) for item in items]
+
 
 def notify_updated(bandoru_id: str, logged_user: Optional[str]):
     if logged_user is None:
@@ -116,7 +124,9 @@ def notify_updated(bandoru_id: str, logged_user: Optional[str]):
     notification_service.send_update_notification(bandoru_id, urls, bandoru.description)
 
 
-def set_webhooks(bandoru_id: str, form: SetBandoruWebhooksForm, logged_username: Optional[str]):
+def set_webhooks(
+    bandoru_id: str, form: SetBandoruWebhooksForm, logged_username: Optional[str]
+):
     if logged_username is None:
         raise ServiceError(401, "Unauthorized")
 
@@ -136,6 +146,7 @@ def set_webhooks(bandoru_id: str, form: SetBandoruWebhooksForm, logged_username:
 
     database.db_table.put_item(Item=item)
 
+
 def get_webhooks(bandoru_id: str, logged_username: Optional[str]) -> list[str]:
     if logged_username is None:
         raise ServiceError(401, "Unauthorized")
@@ -147,7 +158,7 @@ def get_webhooks(bandoru_id: str, logged_username: Optional[str]) -> list[str]:
         raise ServiceError(403, "Forbidden")
 
     pk = f"WEBHOOK#{bandoru_id}"
-    res = database.db_table.get_item(Key={'PK':pk,'SK':pk})
+    res = database.db_table.get_item(Key={"PK": pk, "SK": pk})
     if "Item" not in res:
         return []
 
@@ -156,3 +167,32 @@ def get_webhooks(bandoru_id: str, logged_username: Optional[str]) -> list[str]:
         return []
 
     return item["urls"]
+
+
+def get_failed_webhooks(
+    bandoru_id: str, logged_username: Optional[str]
+) -> list[FailedWebhook]:
+    if logged_username is None:
+        raise ServiceError(401, "Unauthorized")
+
+    bandoru = get(bandoru_id, logged_username)
+    if bandoru is None:
+        raise NotFoundError
+    if bandoru.owner_id != logged_username:
+        raise ServiceError(403, "Forbidden")
+
+    pk = f"FAILED_WEBHOOK_CALL#{bandoru_id}"
+    res = database.db_table.query(KeyConditionExpression=Key("PK").eq(pk))
+    if "Items" not in res:
+        return []
+
+    items = res["Items"]
+
+    return [
+        FailedWebhook(
+            bandoru_id=item["bandoru_id"],
+            webhook_url=item["webhook_url"],
+            timestamp=item["timestamp"],
+        )
+        for item in items
+    ]

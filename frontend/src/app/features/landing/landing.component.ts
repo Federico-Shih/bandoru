@@ -44,6 +44,8 @@ export class LandingComponent {
 
   authService = inject(AuthService);
 
+  hasSubmitted = signal(false);
+
   constructor(private readonly saveBundleFormService: SaveBundleFormService,
               private readonly bundleRepository: BundleRepository,
               private readonly router: Router,
@@ -119,6 +121,7 @@ export class LandingComponent {
   @ViewChild('shareDropdown') dropdown!: ElementRef<HTMLDetailsElement>;
 
   uploadBundle(bundleForm: BundleFormType) {
+    this.hasSubmitted.set(true);
     if (this.dropdown) {
       this.dropdown.nativeElement.open = false;
     }
