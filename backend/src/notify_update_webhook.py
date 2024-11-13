@@ -13,7 +13,7 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
             "messageId": "059f36b4-87a3-44ab-83d2-661975830a7d",
             "body": "{
                        "type": "bandoru-update-notification",
-                       "bandoru-id": <uuid>,
+                       "bandoru_id": <uuid>,
                        "webhook": <url>,
                        "timestamp": ...
                      }",
@@ -22,7 +22,7 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
             "messageId": "2e1424d4-f796-459a-8184-9c92662be6da",
             "body": "{
                        "type": "bandoru-update-notification",
-                       "bandoru-id": <uuid>,
+                       "bandoru_id": <uuid>,
                        "webhook": <url>,
                        "timestamp": ...
                      }.",
@@ -47,7 +47,7 @@ def notify_webhook(event: dict):
             webhook,
             json={
                 "content": f"['{message['desc']}']({FRONTEND_URL}/share/{message['bandoru_id']}) has been updated",
-                "bandoru_id": message.get("bandoru-id"),
+                "bandoru_id": message.get("bandoru_id"),
                 "timestamp": message.get("timestamp"),
             },
             timeout=5,
