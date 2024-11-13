@@ -56,6 +56,24 @@ resource "aws_vpc_endpoint" "dynamodb" {
 resource "aws_vpc_endpoint_policy" "dynamodb_endpoint_policy" {
   vpc_endpoint_id = aws_vpc_endpoint.dynamodb.id
 }
+resource "aws_vpc_endpoint" "sqs" {
+  vpc_id            = module.vpc.vpc_id
+  service_name      = "com.amazonaws.us-east-1.sqs"
+  vpc_endpoint_type = "Interface"
+  private_dns_enabled = true
+
+  subnet_ids = module.vpc.private_subnets
+  security_group_ids = [aws_security_group.bandoru_lambda_sg.id]
+
+  tags = {
+    Terraform   = "true"
+    Environment = "sqs-endpoint"
+  }
+
+}
+resource "aws_vpc_endpoint_policy" "sqs_endpoint_policy" {
+  vpc_endpoint_id = aws_vpc_endpoint.sqs.id
+}
 resource "aws_security_group" "bandoru_lambda_sg" {
   name   = "bandoru-lambda-sg"
   vpc_id = module.vpc.vpc_id
