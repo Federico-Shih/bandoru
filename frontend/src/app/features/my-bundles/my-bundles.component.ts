@@ -50,6 +50,10 @@ export class MyBundlesComponent implements OnInit {
   trySaved = signal(false);
   savingBandoru = signal(false);
 
+  // Webhooks
+  savingWebhooks = signal(false);
+  webhooks = signal<string[]>([]);
+
   ngOnInit(): void {
     this.authService.getUser().pipe(
       switchMap((user) => {
@@ -68,7 +72,7 @@ export class MyBundlesComponent implements OnInit {
         this.bundles = bundles;
         this.loading = false;
         if (bundles.length > 0) {
-          this.loadBundle(bundles[0]);
+          this.setCurrentBundle(bundles[0]);
         } else {
           this.loadingBundle.set(false);
           this.loadingFiles.set(false);
@@ -85,14 +89,21 @@ export class MyBundlesComponent implements OnInit {
     });
   }
 
-  loadBundle(bundle:BundleGetResponse){
+  setCurrentBundle(bundle:BundleGetResponse){
     const textDecoder = new TextDecoder();
     this.currentUrl = window.location.origin + `/share/${bundle.id}`;
+    // Loading current bundle
     this.loadingFiles.set(true);
-    this.bundleService.loadBundle(bundle);
     this.hasBundle.set(true);
     this.selectedBundle.set(bundle);
+    this.bundleService.loadBundle(bundle);
     this.bundleId = bundle.id;
+    this.bundleRepository.getWebhooks(bundle.id).subscribe({
+      next: (webhooks) => {
+        this.webhooks.set(webhooks);
+      }
+    });
+
     this.bundleRepository.getBundle(bundle.id).pipe(
       switchMap(({ files }) => {
         return merge(...files.map((file, index) => this.bundleRepository.downloadFile(file.url ?? '').pipe(map((fileContent) => ({ fileContent, ...file, index })))))
@@ -117,6 +128,25 @@ export class MyBundlesComponent implements OnInit {
         } else {
           this.bookmarkState.set(BookmarkState.NOT_BOOKMARKED);
         }
+      }
+    });
+  }
+
+  saveWebhooks(webhooks: string[]) {
+    const selectedBundle = this.selectedBundle();
+    if (selectedBundle === null) {
+      return;
+    }
+    this.savingWebhooks.set(true);
+    this.bundleRepository.putWebhooks(selectedBundle.id, webhooks).subscribe({
+      next: () => {
+        this.toast.success('Webhooks saved successfully');
+      },
+      error: (err) => {
+        this.toast.error('Error saving webhooks');
+      },
+      complete: () =>{
+        this.savingWebhooks.set(false);
       }
     });
   }

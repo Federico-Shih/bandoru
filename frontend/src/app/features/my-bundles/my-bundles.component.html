@@ -2,7 +2,7 @@
 <div class="w-full h-[110px] flex flex-row items-center justify-center overflow-x-scroll gap-6 pt-5 pr-5">
   @if (bundles && bundles.length > 0 && user != "NO_USER"){
     @for (bundle of bundles; track bundle.id){
-      <button (click)="loadBundle(bundle)">
+      <button (click)="setCurrentBundle(bundle)">
         <div class="card  bg-base-300  w-48  shadow-xl hover:scale-105" >
           <div class="card-body p-4 overflow-hidden">
             <div class="flex flex-row items-center gap-3">
@@ -67,10 +67,10 @@
         </div>
       </div>
       <div class="max-md:hidden flex flex-col card shadow-sm  border border-gray-700">
-        <div class="card-body">
+        <div class="card-body p-5">
             <div class="flex flex-row items-center justify-between">
               <h2 class="card-title text-lg">Description:</h2>
-              <app-bookmark-button (onBookmark)="bookmarkBundle()" (onUnbookmark)="unbookmarkBundle()" 
+              <app-bookmark-button (onBookmark)="bookmarkBundle()" (onUnbookmark)="unbookmarkBundle()"
             [bookmarkState]="getBookmarkState()"></app-bookmark-button>
             </div>
             <div class="divider divider-vertical my-0 py-0"></div>
@@ -94,7 +94,7 @@
       </div>
       <app-copy-link [url]="currentUrl"></app-copy-link>
       <app-fork-link (onClick)="fork()"></app-fork-link>
-      <app-webhook-editor />
+      <app-webhook-editor [webhooks]="webhooks()" [loading]="savingWebhooks()" (save)="saveWebhooks($event)" />
     </aside>
     <section class="col-span-12 md:col-span-9 lg:col-span-8 xl:col-span-6 flex flex-col gap-3 items-stretch">
       @if (loadingFiles()) {

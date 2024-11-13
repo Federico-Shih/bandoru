@@ -1,5 +1,5 @@
 import {Component, effect, EventEmitter, inject, input, Output} from '@angular/core';
-import {FormArray, FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
+import {FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {NgOptimizedImage} from "@angular/common";
 import {ToastService} from "../../state/toast/toast.service";
 import {HttpClient} from "@angular/common/http";
@@ -33,7 +33,10 @@ export class WebhookEditorComponent {
   toast = inject(ToastService);
   httpClient = inject(HttpClient);
   form = new FormGroup({
-    webhooks: new FormArray<FormGroup<{ webhook: FormControl<string | null>, status: FormControl<Webhook["status"] | null>}>>([]),
+    webhooks: new FormArray<FormGroup<{
+      webhook: FormControl<string | null>,
+      status: FormControl<Webhook["status"] | null>
+    }>>([]),
   });
 
   constructor() {
@@ -55,8 +58,8 @@ export class WebhookEditorComponent {
   buildWebhookForm(webhook: string) {
     return new FormGroup(
       {
-        webhook: new FormControl(webhook),
-        status: new FormControl<Webhook["status"]>(WEBHOOK_STATUS.UNTESTED)
+        webhook: new FormControl(webhook, { validators: [Validators.required, Validators.pattern(/^(http|https):\/\/[^ "]+$/)] }),
+        status: new FormControl<Webhook["status"]>(WEBHOOK_STATUS.UNTESTED),
       }
     );
   }
@@ -80,17 +83,30 @@ export class WebhookEditorComponent {
       return;
     }
     this.form.controls.webhooks.at(index).controls.status.setValue(WEBHOOK_STATUS.TESTING);
-    this.httpClient.post(webhookValue, {}).subscribe({
+    this.httpClient.post(webhookValue, { content: 'Test integration' }).subscribe({
       next: () => {
         this.form.controls.webhooks.at(index).controls.status.setValue(WEBHOOK_STATUS.SUCCESS);
+        this.toast.success('Webhook test successful');
       },
-      error: () => {
+      error: (err) => {
+        console.error(err);
         this.form.controls.webhooks.at(index).controls.status.setValue(WEBHOOK_STATUS.FAILURE);
+        this.toast.error('Webhook test failed');
       }
     });
   }
 
+  saveWebhooks() {
+    if (this.form.invalid) {
+      this.toast.error('There are empty or invalid webhooks!');
+      return;
+    }
+    this.save.next(this.form.controls.webhooks.value.map((webhook) => webhook.webhook ?? ''));
+  }
+
   webhooks = input<string[]>([]);
+  loading = input<boolean>(false);
+
   @Output()
   save = new EventEmitter<string[]>();
 }

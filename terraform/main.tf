@@ -57,12 +57,12 @@ resource "aws_vpc_endpoint_policy" "dynamodb_endpoint_policy" {
   vpc_endpoint_id = aws_vpc_endpoint.dynamodb.id
 }
 resource "aws_vpc_endpoint" "sqs" {
-  vpc_id            = module.vpc.vpc_id
-  service_name      = "com.amazonaws.us-east-1.sqs"
-  vpc_endpoint_type = "Interface"
+  vpc_id              = module.vpc.vpc_id
+  service_name        = "com.amazonaws.us-east-1.sqs"
+  vpc_endpoint_type   = "Interface"
   private_dns_enabled = true
 
-  subnet_ids = module.vpc.private_subnets
+  subnet_ids         = module.vpc.private_subnets
   security_group_ids = [aws_security_group.bandoru_lambda_sg.id]
 
   tags = {
@@ -197,7 +197,7 @@ resource "aws_lambda_function" "update_notification_lambda" {
   filename      = "${abspath(path.root)}/hello.zip"
   function_name = "notify_update_webhook"
   role          = data.aws_iam_role.lab_role.arn
-  handler       = "lambda_function.py"
+  handler       = "lambda_function.lambda_handler"
   runtime       = "python3.12"
   environment {
     variables = {
@@ -232,7 +232,8 @@ resource "aws_lambda_function" "save_failed_webhook_lambda" {
   runtime       = "python3.12"
   environment {
     variables = {
-      "DB_TABLE" = var.dynamodb-table-name
+      "DB_TABLE"    = var.dynamodb-table-name,
+      "DB_USER_IDX" = var.dynamodb-user-idx
     }
   }
   layers = ["arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:2"]
