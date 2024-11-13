@@ -6,6 +6,7 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 from shared import bandoru_service
 from shared.forms import CreateBandoruForm
 from shared.auth_jwt import get_username_from_headers
+from shared.notification_service import send_update_notification
 
 tracer = Tracer()
 logger = Logger()
@@ -16,7 +17,7 @@ app = APIGatewayHttpResolver(enable_validation=True, cors=cors_config, debug=Tru
 
 @app.put("/bandoru/<bandoru_id>")
 @tracer.capture_method
-def put_bandoru(bandoru_id:str, form: CreateBandoruForm):
+def put_bandoru(bandoru_id: str, form: CreateBandoruForm):
     username = get_username_from_headers(app.current_event.headers)
     try:
         webhooks = bandoru_service.get_webhooks(bandoru_id, username)
