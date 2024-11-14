@@ -1,6 +1,0 @@
-bandoru-bucket-name      = "bandoru-62293-bucket"
-bandoru-spa-bucket-name  = "bandoru-62293-spa"
-cognito-domain           = "bandoru-62293"
-dynamodb-table-name      = "bandoru"
-dynamodb-user-idx        = "bandoru-by-user"
-aws-profile              = "labo"
