@@ -1,12 +1,63 @@
-# Trabajo Práctico Cloud Computing - Entrega 3
+# Bandoru - A code Sharing platform
 ## Grupo 9 - Integrantes
 - Federico Shih
 - Franco David Rupnik
 - Agustín Morantes
 - Matías Manzur
-## Arquitectura
+
+## What and why
+Bandoru is a full-stack application that leverages S3 and cloud technologies to share code securely and update code configurations on the fly. It was created for a graduate course in Cloud Computing using AWS and created prioritizing Scalability, Elasticity and Decoupled Architecture. 
+### Features
+- Upload Bandoru. Upload multiple files of huge sizes concurrently. Detects syntax from file extension.
+- Anonymous, private and public sharing. Private checks that its the Bandoru's owner before retrieving the Bandoru.
+- Push changes, basically rewrites the Bandoru. Done for private and public sharing.
+- Bookmark Bandorus, to not lose critical shared bandorus.
+- Fork Bandorus, to create your own copy of existing shared Bandorus.
+- Add Webhooks, that notify the specific webhook when there are new updates of your Bandoru. Sends a JSON to the webhook and populates the "content" property for a fast demo with discord.
+- List the bandorus you created.
+
+## Architecture - Arquitectura
 ![Diagrama Arquitectura](./diagrama_arquitectura_cloud.png)
-## How to deploy
+
+### Decisions
+- Due to restrictions using AWS Academy, to provide HTTPS to the frontend application we are using a Amazon API Gateway that provides HTTPS. This is normally done using Cloudfront. DO NOT do this.
+- Use Cognito User Pool to manage clients and validate the Bearer token.
+- Use AWS Lambdas with Python 3.12 for the core backend of the application.
+- Hosted an Angular SPA in AWS S3. Used Tailwind CSS and DaisyUI to quickly generate a theme. Its ✨darkmode✨.
+- Saving Bandoru files in S3 bucket connected by VPC Endpoint. In the future to prioritize security this should use encryption at rest and in transit.
+- Use DynamoDB for low cost and blazing-fast write speeds. Could consider using RDS with an RDS Proxy for lambda connections if the model gets way out of hand.
+- Use SQS for notified webhooks. Has a redrive-policy of 3 retries, and then it is sent to a Dead letter Queue where its registered into DynamoDB.
+- Use Terraform with AWS Provider for fast deployment and migration of architecture. This configures the architecture with one command. Currently, it is creating 105 resources. This is due to us creating 13 Lambdas, 10 with API Gateway integration, a VPC, multiple endpoints.
+
+## How to Deploy - EN
+
+### Prerequisites
+- Docker
+
+### Steps
+1. Place the AWS credentials in `~/.aws/credentials`. The `default` profile will be used.
+2. Ensure the Docker daemon is running:
+   ```bash
+   sudo systemctl start docker
+3. Ensure the user is in the `docker` group:
+```shell
+sudo groupadd docker
+sudo usermod -aG docker $USER
+newgrp docker
+# Verify that Docker can be run without sudo:
+docker run hello-world
+# If it still doesn’t work, restart the computer to apply the changes.
+```
+4. Execute deploy script `./docker-deploy.sh` -> it takes a long time.
+5. Wait for terraform mutation, frontend and backend deploy. In the end, it will print out the website URL.
+
+Terraform variables are located in /terraform/terraform.tfvars, where you can set the AWS profile to use. By default, it uses the default profile.
+
+Note: We once encountered an issue where the AWS credentials expired midway through terraform apply, resulting in an error indicating that the account lacks permissions to make a specific modification. If this happens, restart the lab, reset the credentials, and rerun the script.
+
+---
+
+## How to deploy - ES
 ### Prerequisitos
 - docker
 
