@@ -23,7 +23,7 @@ Bandoru is a full-stack application that leverages S3 and cloud technologies to 
 - Due to restrictions using AWS Academy, to provide HTTPS to the frontend application we are using a Amazon API Gateway that provides HTTPS. This is normally done using Cloudfront. DO NOT do this.
 - Use Cognito User Pool to manage clients and validate the Bearer token.
 - Use AWS Lambdas with Python 3.12 for the core backend of the application.
-- Hosted an Angular SPA in AWS S3. Used Tailwind CSS and DaisyUI to quickly generate a theme. Its ✨darkmode✨.
+- Hosted an Angular SPA in AWS S3. Used Tailwind CSS and DaisyUI to quickly generate a theme. It's ✨darkmode✨.
 - Saving Bandoru files in S3 bucket connected by VPC Endpoint. In the future to prioritize security this should use encryption at rest and in transit.
 - Use DynamoDB for low cost and blazing-fast write speeds. Could consider using RDS with an RDS Proxy for lambda connections if the model gets way out of hand.
 - Use SQS for notified webhooks. Has a redrive-policy of 3 retries, and then it is sent to a Dead letter Queue where its registered into DynamoDB.
